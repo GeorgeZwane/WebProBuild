@@ -34,8 +34,14 @@ namespace WebSpaceApp.Models
         public int CompleteProjects { get; set; }
         public int InProgressProjects { get; set; }
         public int InWaitingProjects { get; set; }
-        
-            public string ProjectName { get; set; }
+        public List<ViewTaskModel> Tasks { get; set; }
+        public string ProjectName { get; set; }
+
+        public string TaskName { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+
+
         // Tasks grouped by status, key = status, value = list of tasks
         public Dictionary<string, List<TaskDTO>> TasksByStatus { get; set; } = new();
         public double TotalBudget { get; set; }

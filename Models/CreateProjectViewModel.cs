@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebSpaceApp.Models
 {
     public class CreateProjectViewModel
     {
+        [JsonProperty("projectId")]
         public int Id { get; set; } 
 
         public required string Name { get; set; }

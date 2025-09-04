@@ -5,6 +5,8 @@ namespace WebSpaceApp.Models
     public class OverviewModel
     {
         public string TaskName { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
 
         public int TotalTasks { get; set; }
         public int CompleteTasks { get; set; }
