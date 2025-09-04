@@ -1,9 +1,15 @@
-﻿@model IEnumerable<WebSpaceApp.Models.ViewTaskModel>
+﻿@model ForemanProgressViewModel
 
 @{
-    ViewData["Title"] = "Task Manager";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "My Work Progress";
+    string alertClass = Model.PerformanceLevel switch
+    {
+        "high" => "alert-success",
+        "medium" => "alert-warning",
+        _ => "alert-danger"
+    };
 }
+
 
 <style>
     body {
@@ -229,7 +235,7 @@
             background-color: #000;
         }
 
-    
+
     .progress-container {
         margin-bottom: 15px;
     }
@@ -274,24 +280,24 @@
             animation: progress-bar-stripes 1s linear infinite;
         }
 
- 
 
-    /* Different colors based on progress */
-    .progress-bar.low-progress {
-        background: linear-gradient(90deg, #dc3545 0%, #e74c3c 100%);
-    }
 
-    .progress-bar.medium-progress {
-        background: linear-gradient(90deg, #ffc107 0%, #f39c12 100%);
-    }
+        /* Different colors based on progress */
+        .progress-bar.low-progress {
+            background: linear-gradient(90deg, #dc3545 0%, #e74c3c 100%);
+        }
 
-    .progress-bar.high-progress {
-        background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
-    }
+        .progress-bar.medium-progress {
+            background: linear-gradient(90deg, #ffc107 0%, #f39c12 100%);
+        }
 
-    .progress-bar.complete {
-        background: linear-gradient(90deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
-    }
+        .progress-bar.high-progress {
+            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+        }
+
+        .progress-bar.complete {
+            background: linear-gradient(90deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
+        }
 
     .progress-percentage {
         font-weight: 600;
@@ -307,25 +313,24 @@
         padding: 40px 0;
         font-weight: 500;
     }
+
+    canvas {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
 </style>
 
 <div class="container">
     <div class="sidebar">
         <div class="logo">Main Menu</div>
         <ul class="nav-list">
-            <li class="active">
-                <a href="@Url.Action("ViewTask", "Task")">View Task</a>
-            </li>
+           
             <li>
-                <a href="@Url.Action("CreateTask", "Task")">Add More Tasks</a>
-            </li>
-            <li>
-                <a href="@Url.Action("LeaderboardView", "Task")">LeaderboardView</a>
+                <a href="@Url.Action("LeaderboardView", "Task")">View Leaderboard</a>
             </li>
 
-            <li>
-                <a href="@Url.Action("SendNotificationView", "Task")">Notification</a>
-            </li>
 
             <li>
                 <a href="@Url.Action("Logout", "Account")">Log out</a>
@@ -336,120 +341,118 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="page-header">
-            <h1 class="page-title">Task Manager:</h1>
+            <h1 class="page-title">Progress Dashboard:@Model.Message</h1>
             @* <button class="btn btn-create">+ Create Task</button> *@
+            <div class="mb-3">
+                <a class="btn btn-secondary" href="javascript:history.back()">⬅️ Back</a>
+            </div>
         </div>
 
-        <div class="projects-grid">
-            @if (Model != null && Model.Any())
-            {
-                foreach (var task in Model)
-                {
-                    <div class="project-card">
-                        <div class="project-title">@task.Description</div>
-                        <div class="project-meta">
-                            Created: @task.StartDate.ToString("MMMM dd, yyyy") |
-                            Deadline: @task.EndDate.ToString("MMMM dd, yyyy")
-                            
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-label">
-                                <span>Progress</span>
-                                <span class="progress-percentage">@(task.Progress ?? 0)%</span>
-                                Priority: @task.Priority
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar @(
-                                     (task.Progress ?? 0) >= 100 ? "complete" :
-                                     (task.Progress ?? 0) >= 75 ? "high-progress" :
-                                     (task.Progress ?? 0) >= 50 ? "medium-progress" :
-                                     "low-progress"
-                                                                )" style="width: @(task.Progress ?? 0) % "></div>
-                    </div>
-                </div>
-                <div class="action-buttons">
 
-                            <a href="@Url.Action("AddMilestone", "Milestone", new { taskId = task.Id})" class="btn btn-primary">Add Milestone</a>
-                          
-                            <a href="@Url.Action("MilestoneView", "Milestone", new { id = task.Id })" class="btn btn-primary">View Milestones</a>
-                        </div>
-                    </div>
-                        }
-            }
-            else
-            {
-                <div class="no-tasks-message">
-                    No available tasks for this project.
-                </div>
-            }
-        </div>
-    </div>
-</div>
 
-<!-- Assign Foreman Modal -->
-<div class="modal fade" id="assignForemanModal" tabindex="-1" aria-labelledby="assignForemanModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="assignForemanForm">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="assignForemanModalLabel">Assign Foreman</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="taskId" name="taskId" />
-                    <div class="form-group">
-                        <label for="foremanSelect">Select Foreman:</label>
-                        <select class="form-control" id="foremanSelect" name="foremanId">
-                            <!-- Options will be populated via AJAX -->
-                        </select>
+        <div class="card-body">
+          
+
+            <div class="row text-center mb-4">
+                <div class="col-md-4">
+                    <div class="border p-3 rounded">
+                        <h6>Total Task</h6>
+                        <h3>@Model.TotalMilestones</h3>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Assign</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <div class="col-md-4">
+                    <div class="border p-3 rounded">
+                        <h6>Completed</h6>
+                        <h3 class="text-success">@Model.CompletedMilestones</h3>
+                    </div>
                 </div>
-            </form>
+                <div class="col-md-4">
+                    <div class="border p-3 rounded">
+                        <h6>Pending</h6>
+                        <h3 class="text-danger">@Model.PendingMilestones</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress mb-3" style="height: 30px;">
+                <div class="progress-bar @($"bg-{(Model.PerformanceLevel == "high" ? "success" : Model.PerformanceLevel == "medium" ? "warning" : "danger")}")"
+                     role="progressbar"
+                     style="width: @Model.CompletionRate.ToString("F2")%;">
+                    @Model.CompletionRate.ToString("F2")% Completed
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-center">Task Status Breakdown</h5>
+                    <canvas id="taskPieChart" style="max-height: 300px;"></canvas>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="text-center">Weekly Performance (Sample)</h5>
+                    <canvas id="taskBarChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="@Url.Action("MilestoneView", "Milestone")" class="btn btn-outline-primary">
+                    View My Milestones
+                </a>
+            </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    $('#assignForemanModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var taskId = button.data('task-id');
-        $('#taskId').val(taskId);
-
-        // Load foremen via AJAX
-        $.ajax({
-            url: '@Url.Action("GetForemen", "Milestone")',
-            type: 'GET',
-            success: function (data) {
-                var $select = $('#foremanSelect');
-                $select.empty();
-                $.each(data, function (i, foreman) {
-                    $select.append($('<option>', {
-                        value: foreman.Id,
-                        text: foreman.Name
-                    }));
-                });
+    // Chart 1: Task Status Pie
+    const ctxPie = document.getElementById('taskPieChart').getContext('2d');
+    const taskPieChart = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'Pending'],
+            datasets: [{
+                label: 'Tasks',
+                data: [@Model.CompletedMilestones, @Model.PendingMilestones],
+                backgroundColor: ['#28a745', '#dc3545'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
             }
-        });
+        }
     });
 
-    // Submit form to assign foreman
-    $('#assignForemanForm').submit(function (e) {
-        e.preventDefault();
-        var formData = $(this).serialize();
-
-        $.post('@Url.Action("AssignForemanToTask", "Milestone")', formData, function (response) {
-            if (response.success) {
-                $('#assignForemanModal').modal('hide');
-                location.reload(); // or update UI accordingly
-            } else {
-                alert("Error assigning foreman.");
-            }
-        });
+    // Chart 2: Weekly Progress Bar (Sample Static)
+    const ctxBar = document.getElementById('taskBarChart').getContext('2d');
+    const taskBarChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Tasks Completed',
+                data: [2, 4, 3, 5], // Replace with real data if needed
+                backgroundColor: '#007bff'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            responsive: true
+        }
     });
 </script>

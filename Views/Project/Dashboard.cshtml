@@ -44,10 +44,8 @@
                 font-weight: bold;
                 margin-bottom: 30px;
                 color: black;
-                padding: 20px;
             }
 
-            
             .sidebar .nav-list {
                 list-style: none;
                 padding: 0;
@@ -66,9 +64,10 @@
                     .sidebar .nav-list li:hover,
                     .sidebar .nav-list li.active {
                         background-color: #ff8c00;
-                        color: #555;
+                        color: #212529;
                         font-weight: bold;
                     }
+
 
         .content {
             flex: 1;
@@ -149,26 +148,7 @@
 <body>
     <div class="container"> 
 
-        <div class="sidebar">
-            <h2 class="logo">Main Menu</h2>
-            <ul class="nav-list">
-                <li>
-                    <a href="@Url.Action("Dashboard", "Project")">Dashboard</a>
-                </li >
-                <li>
-                    <a href="@Url.Action("ViewTask", "Task", new { projectId = projectId })">Tasks</a>
-                </li>
-                <li>
-                    <a href="@Url.Action("BudgetList", "Budget", new { projectId = projectId })">Budget</a>
-                </li>
-                <li>
-                    <a href="@Url.Action("MaterialInventory", "MaterialInventory", new { projectId = projectId })">Materials</a>
-                </li>
-                <li>
-                    <a href="@Url.Action("DocumentView", "Document", new { projectId = projectId })">Updates</a>
-                </li>
-            </ul>
-        </div>
+
         <div class="content">
             <div class="header">
                 <h4>DASHBOARD</h4>
@@ -196,44 +176,105 @@
 
             </div>
 
-            <!-- Chart.js CDN -->
+
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <!-- Task Chart -->
+
             <div style="text-align: center;">
-                <h2>Task Metrics</h2>
-                <canvas id="taskChart" width="200" height="200"></canvas>
+                <br />
+                <hr />
+                <h3 style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">Task Metrics</h3>
+                <div style="width: 310px; height: 200px; margin: 0 auto;">
+                    <canvas id="taskChart"></canvas>
+                </div>
             </div>
 
+            <script>
+                const ctx = document.getElementById('taskChart').getContext('2d');
+                const taskChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                         labels: ['Complete', 'In Progress', 'InWaiting'],
+                        datasets: [{
+                            label: 'Task Share',
+                            data: [
+                        @Model.CompletedTasks,
+                        @Model.InProgressTasks,
+                        @Model.InWaitingTasks
+                    ],
+                            backgroundColor: [
+                               
+                                '#41d964', // Orange
+                                '#90a4ae', // Gray blue
+                                '#fbc02d'  // Gold
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%', // Donut size
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: '#333',
+                                    font: {
+                                        size: 13
+                                    },
+                                    padding: 16
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.label}: ${context.parsed}%`;
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true
+                        }
+                    }
+                });
+            </script>
+
             <div class="recent-section">
-                <h3>Completed Tasks</h3>
-                <p>Latest tasks and documents</p>
+                <h3>Task Details by Status</h3>
+                <p>A detailed view of all tasks, categorized by their current status.</p>
 
-                <h3>Incomplete Tasks</h3>
-                <p>Latest tasks and documents</p>
-
-                <h3>In progress Tasks</h3>
-                <p>Latest tasks and documents</p>
                 @foreach (var statusGroup in Model.TasksByStatus)
                 {
                     <div class="metric-card">
-                        <h3>@statusGroup.Key Tasks (@statusGroup.Value.Count)</h3>
-                        <ul>
-                            @foreach (var task in statusGroup.Value)
-                            {
-                                <li>
-                                    <strong>@task.Description</strong><br />
-                                    Progress: @task.Progress%<br />
-                                    Start: @task.StartDate.ToString("MMM dd, yyyy")<br />
-                                    End: @task.EndDate.ToString("MMM dd, yyyy")
-                                </li>
-                            }
-                        </ul>
+                        <h4>@statusGroup.Key Tasks (@statusGroup.Value.Count)</h4>
+                        @if (statusGroup.Value.Any())
+                        {
+                            <ul style="list-style-type: none; padding: 0;">
+                                @foreach (var task in statusGroup.Value)
+                                {
+                                    <li style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                                        <strong>@task.Description</strong><br />
+                                        Progress: @task.Progress%<br />
+                                        Start: @task.StartDate.ToString("MMM dd, yyyy")<br />
+                                        End: @task.EndDate.ToString("MMM dd, yyyy")
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No tasks found in this category.</p>
+                        }
                     </div>
                 }
             </div>
         </div>
     </div>
-    <script>
+    @* <script>
 
         const taskCtx = document.getElementById('taskChart').getContext('2d');
 
@@ -267,6 +308,6 @@
         });
 
 
-    </script>
+    </script> *@
 </body>
 </html>

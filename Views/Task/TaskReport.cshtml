@@ -168,25 +168,32 @@
         background-color: #f2f2f2;
         font-weight: bold;
     }
+
+    .chart-container {
+        position: relative;
+        height: 350px;
+        margin-bottom: 40px;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
 </style>
 
 <div class="container">
     <div class="sidebar">
         <div class="logo">Main Menu</div>
         <ul class="nav-list">
-            <li class="active">
-                <a href="@Url.Action("ViewTask", "Task")">View  Task</a>
-            </li> 
+
+            @* <li class="active">
+                <a href="@Url.Action("ViewTask", "Task")">View Taski</a>
+            </li>  *@
 
             <li>
-                <a href="@Url.Action("CreateTask", "Task")">Create Task</a>
-            </li> 
-            <li>
-                <a href="@Url.Action("CreateTask", "Task")">Updates</a>
+                <a href="@Url.Action("LeaderboardViewAnalysis", "Task")">Statistics</a>
             </li>
-            <li>
-                <a href="@Url.Action("TaskReport", "Task")">Reports</a>
-            </li>
+          
             <li>
                 <a href="@Url.Action("Logout", "Account")">Log out</a>
             </li>
@@ -233,14 +240,20 @@
         <br />
         <!-- Chart.js CDN -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <!-- Task Chart -->
+        <!-- Chart.js CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <div style="text-align: center;">
-            <h2>Task Metrics</h2>
-            <canvas id="taskChart" width="200" height="200"></canvas>
+            <br />
+            <hr />
+            <h2 style="margin-bottom: 10px;">Task Metrics</h2>
+            <div class="chart-container" >
+                <canvas id="taskChart"></canvas>
+            </div>
+
         </div>
 
         <div class="recent-section">
-            <h3>Overdue Tasks</h3>
+            <h3>Incomplete Tasks</h3>
             <table>
                 <thead>
                     <tr>
@@ -250,17 +263,7 @@
                         <th>Overdue By</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach (var task in Model.OverdueTasks)
-                    {
-                        <tr>
-                            <td>@task.TaskName</td>
-                            <td>@task.AssignedTo</td>
-                            <td>@task.DueDate.ToString("yyyy-MM-dd")</td>
-                            <td>@task.OverdueBy</td>
-                        </tr>
-                    }
-                </tbody>
+               
             </table>
         </div>
     </div>

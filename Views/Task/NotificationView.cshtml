@@ -1,0 +1,52 @@
+﻿@model List<NotificationViewModel>
+
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<style>
+    h2{
+        font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+</style>
+
+<div class="mb-3">
+    <br />
+    <center>
+        <h2 class="mb-4">Notifications</h2>
+    </center>
+    
+    <a class="btn btn-secondary" href="javascript:history.back()">⬅️ Back</a>
+</div>
+@if (!Model.Any())
+{
+    <div class="alert alert-info" role="alert">
+        No notifications yet.
+    </div>
+}
+else
+{
+    <table class="table table-hover table-bordered shadow-sm">
+        <thead class="thead-dark">
+            <tr>
+                <th>Message</th>
+                <th>Time</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var n in Model)
+            {
+                <tr class="@(!n.IsRead ? "table-warning fw-bold" : "")">
+                    <td>@n.Message</td>
+                    <td>@n.SentAt.ToLocalTime().ToString("g")</td>
+                    <td>
+                        <span class="badge @(n.IsRead ? "bg-success" : "bg-warning text-dark")">
+                            @(n.IsRead ? "Read" : "Unread")
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

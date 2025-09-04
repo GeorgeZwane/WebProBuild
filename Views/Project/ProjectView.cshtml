@@ -83,7 +83,7 @@
 
         .pm-project-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0.001,0.2);
         }
 
     .pm-project-title {
@@ -143,6 +143,8 @@
         margin-bottom: 20px;
         padding-bottom: 15px;
         border-bottom: 1px solid #eee;
+        text-align: center;
+        margin: 20px 0;
     }
 
     .pm-page-title {
@@ -243,53 +245,118 @@
         margin-top: 5px;
     }
 
+    .pm-filter-form {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background-color: #f8f9fa;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        width: fit-content;
+    }
+
+        .pm-filter-form label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .pm-filter-form select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+            .pm-filter-form select:hover,
+            .pm-filter-form select:focus {
+                border-color: #ff9800;
+                box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
+                outline: none;
+            }
+
+    label {
+        font-family: fantasy;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+
 </style>
 
 <div class="pm-container">
-    <!-- No sidebar for Project Manager view -->
     <!-- Main Content -->
     <div class="pm-main-content">
         <div class="pm-page-header">
-            <h1 class="pm-page-title">My Projects</h1>
+            <h1 class="pm-page-title">Active Projects</h1>
         </div>
 
+        <center>
+        <form method="get" asp-action="MyProjects" style="margin-bottom: 20px;">
+            <label for="progressFilter">Filter by Progress:</label>
+            <select name="progressFilter" id="progressFilter" class="form-select" style="width: 200px; display: inline-block; margin-left: 10px;" onchange="this.form.submit()">
+                <option value="">-- All --</option>
+                <option value="0-25" @(Context.Request.Query["progressFilter"] == "0-25" ? "selected" : "")>0% - 25%</option>
+                <option value="26-50" @(Context.Request.Query["progressFilter"] == "26-50" ? "selected" : "")>26% - 50%</option>
+                <option value="51-75" @(Context.Request.Query["progressFilter"] == "51-75" ? "selected" : "")>51% - 75%</option>
+                <option value="76-100" @(Context.Request.Query["progressFilter"] == "76-100" ? "selected" : "")>76% - 100%</option>
+
+            </select>
+        </form>
+        </center>
+
         <div class="project-banner">
-            
             <div class="pm-projects-grid">
-                @foreach (var project in Model)
+                @if (Model != null && Model.Any())
                 {
-                    <div class="pm-project-card">
-                        <div class="pm-project-title">@project.Name</div>
-                        <div class="pm-project-meta">
-                            Created: @project.Startdate.ToString("MMMM dd, yyyy") |
-                            Deadline: @project.Enddate.ToString("MMMM dd, yyyy")
-                        </div>
-
-                        <div class="pm-progress-container">
-                            <span class="pm-progress-label">Progress:</span>
-                            <div class="pm-progress-bar-wrapper">
-                                <div class="pm-progress-bar-container">
-                                    <div class="pm-progress-bar @(
-                                         (project.Progress ?? 0) >= 100 ? "complete" :
-                                         (project.Progress ?? 0) >= 75 ? "high-progress" :
-                                         (project.Progress ?? 0) >= 50 ? "medium-progress" :
-                                         "low-progress"
-                                                                        )" style="width: @(project.Progress ?? 0) % "></div>
+                    foreach (var project in Model)
+                    {
+                        <div class="pm-project-card">
+                            <div class="pm-project-title">@project.Name</div>
+                            <div class="pm-project-meta">
+                                Created: @project.Startdate.ToString("MMMM dd, yyyy") |
+                                Deadline: @project.Enddate.ToString("MMMM dd, yyyy")
                             </div>
-                            <span class="pm-progress-percentage">@(project.Progress ?? 0)%</span>
+
+                            <div class="pm-progress-container">
+                                <span class="pm-progress-label">Progress:</span>
+                                <div class="pm-progress-bar-wrapper">
+                                    <div class="pm-progress-bar-container">
+                                        <div class="pm-progress-bar @(
+                                             (project.Progress ?? 0) >= 100 ? "complete" :
+                                             (project.Progress ?? 0) >= 75 ? "high-progress" :
+                                             (project.Progress ?? 0) >= 50 ? "medium-progress" :
+                                             "low-progress"
+                                                                                        )" style="width: @(project.Progress ?? 0) %; ">
+                                </div>
+                            </div>
+                            <span class="pm-progress-percentage">@((project.Progress ?? 0).ToString("F2"))%</span>
                         </div>
                     </div>
 
-                        <div class="pm-location-info">
-                            Location: @project.Location
-                        </div>
+                            <div class="pm-location-info">
+                                Location: @project.Location
+                            </div>
 
-                        <div class="pm-action-buttons">
-                            <a class="pm-btn pm-btn-primary" href="@Url.Action("ViewTask", "Task", new { projectId = project.Id })">View Task</a>
-                            <a class="pm-btn pm-btn-primary" href="@Url.Action("Dashboard", "Project", new { projectId = project.Id })">View Project</a>
+                            <div class="pm-action-buttons">
+                                <a class="pm-btn pm-btn-primary" href="@Url.Action("ViewTask", "Task", new { projectId = project.Id })">View Task</a>
+                                <a class="pm-btn pm-btn-primary" href="@Url.Action("Dashboard", "Project", new { projectId = project.Id })">Monitor</a>
+                            </div>
                         </div>
-                    </div>
                                 }
+                }
+                else
+                {
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; font-size: 18px; color: #888;">
+                        🚧 No active projects available at the moment.
+                    </div>
+                }
             </div>
         </div>
     </div>

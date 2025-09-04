@@ -1,0 +1,110 @@
+﻿@model List<LeaderboardViewModel>
+
+@{
+    ViewData["Title"] = "Foreman Leaderboard Analysis";
+}
+
+<style>
+    h2 {
+        font-family: 'Impact', sans-serif;
+        letter-spacing: 1px;
+        text-shadow: 2px 2px #000;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: #fff;
+    }
+
+   /*  .table tbody tr:nth-child(1) {
+        background-color: #ffc107 !important;
+    } */
+
+    .table tbody tr:hover {
+        background-color: #f0f0f0;
+        cursor: pointer;
+    }
+
+    .table {
+        border: 2px solid #333;
+        border-radius: 5px;
+    }
+
+    .table-info,
+    .table-info > th,
+    .table-info > td {
+        background-color: lawngreen;
+    }
+
+</style>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">
+        Foreman Leaderboard Analysis
+    </h2>
+
+    <div class="mb-3">
+        <a class="btn btn-secondary" href="javascript:history.back()">
+            ⬅️ Back
+        </a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger text-center">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover shadow-sm bg-light">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Foreman</th>
+                        <th>Total Tasks</th>
+                        <th>Tasks Completed</th>
+                        <th>Tasks Incomplete</th>
+                      @*   <th>🎯 Total Milestones</th>
+                        <th>✅ Milestones Completed</th>
+                        <th>❌ Milestones Incomplete</th> *@
+                        <th>Task Completion %</th>
+                       @*  <th>📊 Milestone Completion %</th> *@
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var foreman = Model[i];
+                        var rankClass = i == 0 ? "table-warning fw-bold" : "";
+
+                        <tr class="@rankClass">
+                            <td>@(i + 1)</td>
+                            <td>@foreman.FullName</td>
+                            <td>@foreman.TotalTasks</td>
+                            <td>@foreman.CompletedTasks</td>
+                            <td>@foreman.IncompletedTasks</td>
+                         
+                            <td>@foreman.AverageTaskCompletionRate.ToString("F2")%</td>
+                    
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            No leaderboard data available.
+        </div>
+    }
+</div>

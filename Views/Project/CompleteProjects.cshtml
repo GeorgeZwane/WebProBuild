@@ -246,7 +246,7 @@
     }
 
     .progress-bar-wrapper {
-        flex: 0 0 50%; 
+        flex: 0 0 50%; /* Takes up exactly half the remaining space */
         display: flex;
         align-items: center;
         gap: 10px;
@@ -270,7 +270,7 @@
         overflow: hidden;
     }
 
-      
+        /* Progress colors based on percentage */
         .progress-bar.low-progress {
             background: linear-gradient(90deg, #dc3545 0%, #e74c3c 100%);
         }
@@ -330,104 +330,142 @@
         <div class="page-header">
             <h1 class="page-title">Project Overview</h1>
         </div>
-
+        <hr />
         <center><h2 class="project-banner">In-Progress Projects</h2></center>
+        <hr />
+        @{
+            var inProgressProjects = Model.Where(p => p.Status == "In Progress").ToList();
+        }
 
-        
-        <div class="director-projects-grid">
-            @foreach (var project in Model.Where(p => p.Status == "In Progress"))
-            {
-                <div class="director-project-card">
-                    <div class="project-title">@project.Name</div>
-                    <div class="project-meta">
-                        Created: @project.Startdate.ToString("MMMM dd, yyyy") |
-                        Deadline: @project.Enddate.ToString("MMMM dd, yyyy")
-                    </div>
-                    <div class="location-info">
-                        Location: @project.Location
-                    </div>
-                    <div class="progress-container">
-                        <span class="progress-label">Progress:</span>
-                        <div class="progress-bar-wrapper">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar @((project.Progress ?? 0) >= 100 ? "complete" : (project.Progress ?? 0) >= 75 ? "high-progress" : (project.Progress ?? 0) >= 50 ? "medium-progress" : "low-progress")" style="width: @(project.Progress ?? 0) % "></div>
+        @if (inProgressProjects.Any())
+        {
+            <div class="director-projects-grid">
+                @foreach (var project in inProgressProjects)
+                {
+                    <div class="director-project-card">
+                        <div class="project-title">@project.Name</div>
+                        <div class="project-meta">
+                            Created: @project.Startdate.ToString("MMMM dd, yyyy") |
+                            Deadline: @project.Enddate.ToString("MMMM dd, yyyy")
+                        </div>
+                        <div class="location-info">
+                            Location: @project.Location
+                        </div>
+                        <div class="progress-container">
+                            <span class="progress-label">Progress:</span>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar @((project.Progress ?? 0) >= 100 ? "complete" : (project.Progress ?? 0) >= 75 ? "high-progress" : (project.Progress ?? 0) >= 50 ? "medium-progress" : "low-progress")" style="width: @(project.Progress ?? 0) % "></div>
+                                </div>
+                                <span class="progress-percentage">@(project.Progress ?? 0)%</span>
                             </div>
-                            <span class="progress-percentage">@(project.Progress ?? 0)%</span>
+                        </div>
+                        <div class="action-buttons">
+                            <a class="btn btn-primary" href="@Url.Action("ViewTask", "Task", new { projectId = project.Id })">View Task</a>
+                            <a class="btn btn-primary" href="@Url.Action("Dashboard", "Project", new { projectId = project.Id })">View Project</a>
                         </div>
                     </div>
-                    <div class="action-buttons">
-                        <a class="btn btn-primary" href="@Url.Action("ViewTask", "Task", new { projectId = project.Id })">View Task</a>
-                        <a class="btn btn-primary" href="@Url.Action("Dashboard", "Project", new { projectId = project.Id })">View Project</a>
-                    </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p style="text-align: center; color: gray;">No in-progress projects available.</p>
+        }
 
-    
-        <center> <h2 class="project-banner">Waiting Projects</h2></center>
-       
-        <div class="director-projects-grid">
-            @foreach (var project in Model.Where(p => p.Status == "Not Started"))
-            {
-                <div class="director-project-card">
-                    <div class="project-title">@project.Name</div>
-                    <div class="project-meta">
-                        Created: @project.Startdate.ToString("MMMM dd, yyyy") |
-                        Deadline: @project.Enddate.ToString("MMMM dd, yyyy")
-                    </div>
-                    <div class="location-info">
-                        Location: @project.Location
-                       
-                    </div>
-                    <div class="progress-container">
-                        <span class="progress-label">Progress:</span>
-                        <div class="progress-bar-wrapper">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar @((project.Progress ?? 0) >= 100 ? "complete" : (project.Progress ?? 0) >= 75 ? "high-progress" : (project.Progress ?? 0) >= 50 ? "medium-progress" : "low-progress")" style="width: @(project.Progress ?? 0) % "></div>
+        <hr />
+        <center><h2 class="project-banner">Waiting Projects</h2></center>
+        <hr />
+        @{
+            var waitingProjects = Model.Where(p => p.Status == "InWaiting").ToList();
+        }
+
+        @if (waitingProjects.Any())
+        {
+            <div class="director-projects-grid">
+                @foreach (var project in waitingProjects)
+                {
+                 
+                        <div class="director-project-card">
+                            <div class="project-title">@project.Name</div>
+                            <div class="project-meta">
+                                Created: @project.Startdate.ToString("MMMM dd, yyyy") |
+                                Deadline: @project.Enddate.ToString("MMMM dd, yyyy")
                             </div>
-                            <span class="progress-percentage">@(project.Progress ?? 0)%</span>
+                            <div class="location-info">
+                                Location: @project.Location
+                            </div>
+                            <div class="progress-container">
+                                <span class="progress-label">Progress:</span>
+                                <div class="progress-bar-wrapper">
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar @((project.Progress ?? 0) >= 100 ? "complete" : (project.Progress ?? 0) >= 75 ? "high-progress" : (project.Progress ?? 0) >= 50 ? "medium-progress" : "low-progress")" style="width: @(project.Progress ?? 0) % "></div>
+                                    </div>
+                                    <span class="progress-percentage">@(project.Progress ?? 0)%</span>
+                                </div>
+                            </div>
+                            <div class="action-buttons">
+                                <a class="btn btn-primary" href="@Url.Action("ViewTask", "Task", new { projectId = project.Id })">View Task</a>
+                                <a class="btn btn-primary" href="@Url.Action("Dashboard", "Project", new { projectId = project.Id })">View Project</a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="action-buttons">
-                        <a class="btn btn-primary" href="@Url.Action("ViewTask", "Task", new { projectId = project.Id })">View Task</a>
-                        <a class="btn btn-primary" href="@Url.Action("Dashboard", "Project", new { projectId = project.Id })">View Project</a>
-                    </div>
-                </div>
-            }
-        </div>
+                 
+                }
+            </div>
+        }
+        else
+        {
+            <p style="text-align: center; color: gray;">No waiting projects available.</p>
+        }
 
-        
 
+        <hr />
         <center><h2 class="project-banner">Complete Projects</h2></center>
-        <div class="director-projects-grid">
-            @foreach (var project in Model.Where(p => p.Status == "Completed"))
-            {
-                <div class="director-project-card">
-                    <div class="project-title">@project.Name</div>
-                    <div class="project-meta">
-                        Created: @project.Startdate.ToString("MMMM dd, yyyy") |
-                        Deadline: @project.Enddate.ToString("MMMM dd, yyyy")
-                    </div>
-                    <div class="location-info">
-                        Location: @project.Location
-                      
-                    </div>
-                    <div>    </div>
-                    <div class="progress-container">
-                        <span class="progress-label">Progress:</span>
-                        <div class="progress-bar-wrapper">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar @((project.Progress ?? 0) >= 100 ? "complete" : (project.Progress ?? 0) >= 75 ? "high-progress" : (project.Progress ?? 0) >= 50 ? "medium-progress" : "low-progress")" style="width: @(project.Progress ?? 0) % "></div>
+        <hr />
+
+        @{
+            var completeProjects = Model.Where(p => p.Status == "Complete").ToList();
+        }
+
+        @if (completeProjects.Any())
+        {
+            <div class="director-projects-grid">
+                @foreach (var project in completeProjects)
+                {
+                  
+                       
+                            <div class="director-project-card">
+                                <div class="project-title">@project.Name</div>
+                                <div class="project-meta">
+                                    Created: @project.Startdate.ToString("MMMM dd, yyyy") |
+                                    Deadline: @project.Enddate.ToString("MMMM dd, yyyy")
+                                </div>
+                                <div class="location-info">
+                                    Location: @project.Location
+                                </div>
+                                <div class="progress-container">
+                                    <span class="progress-label">Progress:</span>
+                                    <div class="progress-bar-wrapper">
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar @((project.Progress ?? 0) >= 100 ? "complete" : (project.Progress ?? 0) >= 75 ? "high-progress" : (project.Progress ?? 0) >= 50 ? "medium-progress" : "low-progress")" style="width: @(project.Progress ?? 0) % "></div>
+                                        </div>
+                                        <span class="progress-percentage">@(project.Progress ?? 0)%</span>
+                                    </div>
+                                </div>
+                                <div class="action-buttons">
+                                    <a class="btn btn-primary" href="@Url.Action("ViewTask", "Task", new { projectId = project.Id })">View Task</a>
+                                    <a class="btn btn-primary" href="@Url.Action("Dashboard", "Project", new { projectId = project.Id })">View Project</a>
+                                </div>
                             </div>
-                            <span class="progress-percentage">@(project.Progress ?? 0)%</span>
-                        </div>
-                    </div>
-                    <div class="action-buttons">
-                        <a class="btn btn-primary" href="@Url.Action("ViewTask", "Task", new { projectId = project.Id })">View Task</a>
-                        <a class="btn btn-primary" href="@Url.Action("Dashboard", "Project", new { projectId = project.Id })">View Project</a>
-                    </div>
-                </div>
-            }
-        </div>
+                        
+                  
+                }
+            </div>
+        }
+        else
+        {
+            <p style="text-align: center; color: gray;">No completed projects available.</p>
+        }
+
     </div>
 </div>
