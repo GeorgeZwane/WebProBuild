@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json; 
-using System.Net.Http.Headers; 
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
 using System.Text;
 using WebSpaceApp.DTOs;
-using WebSpaceInnovatorsWebApp.Configs; 
+using WebSpaceInnovatorsWebApp.Configs;
 public class TaskService
 {
     private readonly HttpClient _httpClient;
@@ -19,8 +19,7 @@ public class TaskService
         _httpClient.BaseAddress = new Uri(_baseUrl); 
     }
 
-
-
+   
     
     public async Task<HttpResponseMessage> GetAllTaskAsync(string token)
     {
@@ -43,6 +42,69 @@ public class TaskService
         return response;
     }
 
+    public async Task<HttpResponseMessage> GetAllTaskByUserIDAsync(string token, int userId)
+    {
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var url = $"api/webtask/getAllTaskByUserID/{userId}";
+
+        Console.WriteLine($"Requesting URL: {url}");
+
+        HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+        return response;
+    }
+
+    public async Task<HttpResponseMessage> GetLeaderboardAsync(string token)
+    {
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var url = $"api/webtask/getLeaderboard/";
+
+        Console.WriteLine($"Requesting URL: {url}");
+
+        HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+        return response;
+    }
+
+    public async Task<HttpResponseMessage> GetNotificationsAsync(string token,int foremanid)
+    {
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var url = $"api/webtask/getMessagesforforeman/{foremanid}";
+
+        Console.WriteLine($"Requesting URL: {url}");
+
+        HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+        return response;
+    }
+
+    public async Task<HttpResponseMessage> SendNotificationAsync(string token, SendNotificationDTO dto)
+    {
+        // Set the bearer token
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var jsonContent = JsonConvert.SerializeObject(dto);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        Console.WriteLine($"Attempting to POST new notification to: {_baseUrl}api/webtask");
+        Console.WriteLine($"Notification Data: {jsonContent}");
+
+        HttpResponseMessage response = await _httpClient.PostAsync("api/webtask/sendmessage", content);
+
+        Console.WriteLine($"API Send Notification Response Status: {response.StatusCode}");
+        if (!response.IsSuccessStatusCode)
+        {
+            string errorContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"API Send Notification Error Content: {errorContent}");
+        }
+
+        return response;
+
+    }
+
 
     public async Task<HttpResponseMessage> GetTaskCountsByProjectIdAsync(string token, int projectId)
     {
@@ -63,6 +125,18 @@ public class TaskService
         return response;
     }
 
+    //public async Task<HttpResponseMessage> CreateTaskAsync(AddTaskDTO taskDto, string token)
+    //{
+    //    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+    //    var jsonContent = JsonConvert.SerializeObject(taskDto);
+    //    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+
+    //    HttpResponseMessage response = await _httpClient.PostAsync("api/task/createTask", content);
+
+    //    return response;
+    //}
 
 
 
@@ -104,7 +178,7 @@ public class TaskService
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         Console.WriteLine($"Attempting to DELETE task {id} from: {_baseUrl}api/tasks/{id}");
-        HttpResponseMessage response = await _httpClient.DeleteAsync($"api/webtask/{id}"); 
+        HttpResponseMessage response = await _httpClient.DeleteAsync($"api/webtask/{id}"); // Adjust API route
         return response;
     }
 
@@ -112,7 +186,7 @@ public class TaskService
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         Console.WriteLine($"Attempting to GET all tasks from: {_baseUrl}api/webtask");
-        HttpResponseMessage response = await _httpClient.GetAsync("api/webtask/getAllUsers"); 
+        HttpResponseMessage response = await _httpClient.GetAsync("api/webtask/getAllUsers"); // Adjust API route
         return response;
     }
 
@@ -170,47 +244,6 @@ public class TaskService
             throw;
         }
     }
-    public async Task<List<SelectListItem>> GetUsersForDropdownAsync(string token)
-    {
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        HttpResponseMessage response = await _httpClient.GetAsync("api/webtask/getAllForemen");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            Console.WriteLine($"Failed to fetch foremen. Status: {response.StatusCode}");
-            string errorContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Error content: {errorContent}");
-            return new List<SelectListItem>();
-        }
-
-        var json = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"Raw API response: {json}");
-
-        var foremen = JsonConvert.DeserializeObject<List<UserDto>>(json);
-
-        if (foremen == null || !foremen.Any())
-        {
-            Console.WriteLine("No foremen found or deserialization failed");
-            return new List<SelectListItem>();
-        }
-
-        var selectList = foremen.Select(f => new SelectListItem
-        {
-            Value = f.Id.ToString(), // This will be submitted to the API
-            Text = $"{f.Name} (ID: {f.Id})" // Show both name and ID for debugging
-        }).ToList();
-
-        // Debug: Log the created select list
-        Console.WriteLine($"Created SelectListItem collection with {selectList.Count} items:");
-        foreach (var item in selectList)
-        {
-            Console.WriteLine($"  Value: '{item.Value}', Text: '{item.Text}'");
-        }
-
-        return selectList;
-    }
-
 
     public async Task<HttpResponseMessage> GetAllForemenAsync(string token)
     {
@@ -232,65 +265,24 @@ public class TaskService
         return response;
     }
 
-    //public async Task<List<SelectListItem>> GetUsersForDropdownAsync(string token)
-    //{
-    //    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-    //    HttpResponseMessage response = await _httpClient.GetAsync("api/webtask/getAllForemen");
+    public async Task<List<SelectListItem>> GetUsersForDropdownAsync(string token)
+    {
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        HttpResponseMessage response = await _httpClient.GetAsync("api/webtask/getAllForemen");
 
-    //    if (!response.IsSuccessStatusCode)
-    //        return new List<SelectListItem>(); // or handle error
+        if (!response.IsSuccessStatusCode)
+            return new List<SelectListItem>(); // or handle error
 
-    //    var json = await response.Content.ReadAsStringAsync();
-    //    var users = JsonConvert.DeserializeObject<List<UserDto>>(json);
+        var json = await response.Content.ReadAsStringAsync();
+        var users = JsonConvert.DeserializeObject<List<UserDto>>(json);
 
-    //    var selectList = users.Select(u => new SelectListItem
-    //    {
-    //        Value = u.Id.ToString(),
-    //        Text = u.Name
-    //    }).ToList();
+        var selectList = users.Select(u => new SelectListItem
+        {
+            Value = u.Id.ToString(),
+            Text = u.Name
+        }).ToList();
 
-    //    return selectList;
-    //}
+        return selectList;
+    }
 
-    //public async Task<HttpResponseMessage> GetAllDocumentsAsync(string token)
-    //{
-    //    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-    //    Console.WriteLine($"Attempting to GET all documents from: {_baseUrl}api/documents");
-    //    HttpResponseMessage response = await _httpClient.GetAsync("api/documents/getAll");
-    //    return response;
-    //}
-
-    //public async Task<HttpResponseMessage> UploadDocumentAsync(UploadDocumentDTO dto, string token)
-    //{
-    //    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-    //    var formContent = new MultipartFormDataContent();
-    //    formContent.Add(new StringContent(dto.Title), "Title");
-    //    formContent.Add(new StringContent(dto.TaskId.ToString()), "TaskId");
-    //    formContent.Add(new StringContent(dto.Comment ?? ""), "Comment");
-    //    formContent.Add(new ByteArrayContent(dto.FileContent), "File", dto.FileName);
-
-    //    Console.WriteLine($"Attempting to POST new document to: {_baseUrl}api/documents/upload");
-
-    //    HttpResponseMessage response = await _httpClient.PostAsync("api/documents/upload", formContent);
-
-    //    Console.WriteLine($"API Upload Document Response Status: {response.StatusCode}");
-    //    if (!response.IsSuccessStatusCode)
-    //    {
-    //        string errorContent = await response.Content.ReadAsStringAsync();
-    //        Console.WriteLine($"API Upload Document Error Content: {errorContent}");
-    //    }
-
-    //    return response;
-    //}
-
-    //public async Task<HttpResponseMessage> GetDocumentUpdatesAsync(string token)
-    //{
-    //    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-    //    Console.WriteLine($"Attempting to GET document updates from: {_baseUrl}api/documents/updates");
-    //    HttpResponseMessage response = await _httpClient.GetAsync("api/documents/updates");
-    //    return response;
-    //}
-
-
-}
+} 

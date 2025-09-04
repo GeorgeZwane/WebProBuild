@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebSpaceApp;
 using WebSpaceApp.DTOs;
+using WebSpaceApp.Models;
 using WebSpaceInnovatorsWebApp.Configs; 
 using WebSpaceInnovatorsWebApp.DTOs;
 
@@ -33,6 +34,48 @@ namespace WebSpaceInnovatorsWebApp.Services
             Console.WriteLine($"ProjectServices initialized. Base URL: {_baseUrl}");
         }
 
+        public async Task<HttpResponseMessage> GetAllTaskByIDAsync(string token, int projectId)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var url = $"api/webtask/getAllTaskByProjectID/{projectId}";
+
+            Console.WriteLine($"Requesting URL: {url}");
+
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+            return response;
+        }
+
+        public async Task<List<MilestoneViewModel>?> GetMilestonesByTaskIdAsync(Guid taskId)
+        {
+            string requestUrl = $"api/webmilestone/{taskId}/GetMilestonesByTaskID";
+            try
+            {
+                HttpResponseMessage response = await _httpClient.GetAsync(requestUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    var milestones = JsonConvert.DeserializeObject<List<MilestoneViewModel>>(jsonResponse);
+                    return milestones;
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    throw new HttpRequestException($"API call failed with status code {response.StatusCode}: {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while fetching milestones: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<HttpResponseMessage> GetTaskCountByPIDAsync(string token, int projectId)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -45,6 +88,74 @@ namespace WebSpaceInnovatorsWebApp.Services
 
             return response;
         }
+
+        public async Task<HttpResponseMessage> GetTaskCompletedByPIDAsync(string token, int projectId)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var url = $"api/webtask/getAllCompletedTaskByProjectID/{projectId}";
+
+            Console.WriteLine($"Requesting URL: {url}");
+
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> GetTaskIncompleteByPIDAsync(string token, int projectId)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var url = $"api/webtask/getAllInCompleteTaskByProjectID/{projectId}";
+
+            Console.WriteLine($"Requesting URL: {url}");
+
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> GetTaskInProgressByPIDAsync(string token, int projectId)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var url = $"api/webtask/getAllProgressTaskByProjectID/{projectId}";
+
+            Console.WriteLine($"Requesting URL: {url}");
+
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> UpdateProjectAsync(string token, int projectId)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var url = $"api/webtask/updateProject/{projectId}";
+
+            Console.WriteLine($"Requesting URL: {url}");
+
+            // Ideally use PUT or POST for updates
+            HttpResponseMessage response = await _httpClient.PutAsync(url, null);
+
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> UpdateTaskAsync(string token, int projectId)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var url = $"api/webtask/updateTaskUsingMilestones/{projectId}";
+
+            Console.WriteLine($"Requesting URL: {url}");
+
+            // Ideally use PUT or POST for updates
+            HttpResponseMessage response = await _httpClient.PutAsync(url, null);
+
+            return response;
+        }
+
 
         public async Task<HttpResponseMessage> RegisterAsync(RegisterDto dto)
         {
@@ -190,25 +301,25 @@ namespace WebSpaceInnovatorsWebApp.Services
             return response;
         }
 
-        //public async Task<HttpResponseMessage> GetAllForemenAsync(int userId, string token)
-        //{
+        public async Task<HttpResponseMessage> GetAllForemenAsync(string token)
+        {
 
-        //    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        //    string url = $"api/webtask/getAllForemen";
-        //    Console.WriteLine($"Attempting to GET all users from: {_baseUrl}{url}");
+            string url = $"api/webtask/getAllForemen";
+            Console.WriteLine($"Attempting to GET all users from: {_baseUrl}{url}");
 
-        //    HttpResponseMessage response = await _httpClient.GetAsync(url);
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
 
-        //    Console.WriteLine($"API All Users Response Status: {response.StatusCode}");
-        //    if (!response.IsSuccessStatusCode)
-        //    {
-        //        string errorContent = await response.Content.ReadAsStringAsync();
-        //        Console.WriteLine($"API All Users Error Content: {errorContent}");
-        //    }
+            Console.WriteLine($"API All Users Response Status: {response.StatusCode}");
+            if (!response.IsSuccessStatusCode)
+            {
+                string errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"API All Users Error Content: {errorContent}");
+            }
 
-        //    return response;
-        //}
+            return response;
+        }
 
         public async Task<HttpResponseMessage> AssignUserRoleAsync(AssignRoleDto dto, string token)
         {
@@ -253,7 +364,26 @@ namespace WebSpaceInnovatorsWebApp.Services
             return response;
         }
 
-       
+        public async Task<HttpResponseMessage> GetProjectAndTaskCountsForEachAsync(string token,int projectId)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            string url = $"api/webprojects/countAllProjectAndTasksForEach/{projectId}";
+            Console.WriteLine($"Attempting to GET counts from: {_baseUrl}{url}");
+
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+            Console.WriteLine($"API Project/Task Counts Response Status: {response.StatusCode}");
+            if (!response.IsSuccessStatusCode)
+            {
+                string errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"API Counts Error Content: {errorContent}");
+            }
+
+            return response;
+        }
+
+
 
 
         public async Task<HttpResponseMessage> AddTeamProjectsAsync(TeamDto teamDto, string token)
