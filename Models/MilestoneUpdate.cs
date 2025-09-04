@@ -7,17 +7,12 @@ namespace WebSpaceApp.Models
         [Required]
         public Guid Id { get; set; }
 
-        [Display(Name = "Milestone Name")] // Fixed the display name
+        [Display(Name = "Task Name")]
         public string MilestoneName { get; set; }
 
         [Required]
         public string Status { get; set; }
 
         public string Reason { get; set; }
-
-        // This is crucial for proper redirection
-        public Guid TaskEntityId { get; set; }
-
-
     }
 }

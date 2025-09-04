@@ -8,18 +8,11 @@
         public bool IsOverdue { get; set; }
     }
 
-    public class TaskDetail
-    {
-        public string TaskName { get; set; }
-        public string AssignedTo { get; set; }
-        public DateTime DueDate { get; set; }
-        public string OverdueBy { get; set; }
-    }
+  
 
     public class TaskReportViewModel
     {
         public List<TaskMetric> Metrics { get; set; }
-        public List<TaskDetail> OverdueTasks { get; set; }
         public List<string> ChartLabels { get; set; }
         public List<int> ChartValues { get; set; }
 
@@ -29,6 +22,12 @@
         public int CompleteTasks { get; set; }
         public int InProgressTasks { get; set; }
         public int IncompleteTasks { get; set; }
+        public List<Task> Tasks { get; set; }
+
+        public string Name { get; set; }
+        public string AssignedTo { get; set; }
+        public DateTime DueDate { get; set; }
+        public string OverdueBy { get; set; }
     }
 
 }
