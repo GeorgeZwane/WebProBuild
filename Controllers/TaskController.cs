@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using NuGet.Common;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -31,12 +33,10 @@ namespace WebSpaceApp.Controllers
 [Route("api/webtask")]
 public async Task<IActionResult> ViewTask(int? projectId)
 {
-            string? userRole = HttpContext.Session.GetString("UserRole");
-            // Step 1: Handle missing projectId (try session fallback)
-            if (!projectId.HasValue)
+    // Step 1: Handle missing projectId (try session fallback)
+    if (!projectId.HasValue)
     {
         int? sessionProjectId = HttpContext.Session.GetInt32("ProjectId");
-       
         if (!sessionProjectId.HasValue)
         {
             TempData["ErrorMessage"] = "Project ID is missing. Please select a project.";
@@ -57,14 +57,14 @@ public async Task<IActionResult> ViewTask(int? projectId)
         TempData["ErrorMessage"] = "You need to be logged in to view tasks.";
         return RedirectToAction("Login", "Account");
     }
-
+   
     // Step 3: Initialize view model list
     List<ViewTaskModel> tasks = new List<ViewTaskModel>();
 
     try
     {
-        // Step 4: Call service to get tasks for the project
-        HttpResponseMessage apiResponse = await _taskServices.GetAllTaskByIDAsync(token, projectid);
+    // Step 4: Call service to get tasks for the project
+    HttpResponseMessage apiResponse = await _taskServices.GetAllTaskByIDAsync(token, projectid);
 
         if (apiResponse.IsSuccessStatusCode)
         {
@@ -87,7 +87,9 @@ public async Task<IActionResult> ViewTask(int? projectId)
                         Description = dto.Description,
                         ProjectId = dto.ProjectId
                     });
-                }
+                            await _projectServices.UpdateTaskAsync(token, dto.ProjectId);
+                            Console.WriteLine($"Updating task using {dto.ProjectId}");
+                        }
             }
         }
         else
@@ -108,46 +110,374 @@ public async Task<IActionResult> ViewTask(int? projectId)
         Console.WriteLine($"JsonException in TaskController.ViewTask: {jsonEx.Message}");
     }
     catch (Exception ex)
-     {
+    {
         TempData["ErrorMessage"] = $"An unexpected error occurred while loading tasks: {ex.Message}";
         Console.WriteLine($"General Exception in TaskController.ViewTask: {ex.Message}");
-     }
+    }
 
-            // Step 5: Return the view with tasks
-            ViewBag.UserRole = userRole ?? "Unknown";
-            return View("ViewTask", tasks);
+    // Step 5: Return the view with tasks
+    return View("ViewTask", tasks);
 }
 
-        // GET: /Task/CreateTask
-        // Display the form to create a new task
+        [HttpGet]
+        public async Task<IActionResult> ViewTaskMilestone(int? userid, string? progressFilter)
+        {
+
+            string? token = HttpContext.Session.GetString("JwtToken");
+            string? userIdString = HttpContext.Session.GetString("UserId");
+
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                TempData["ErrorMessage"] = "You need to be logged in to view tasks.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Step 3: Initialize view model list
+            List<ViewTaskModel> tasks = new List<ViewTaskModel>();
+
+            try
+            {
+                // Step 4: Call service to get tasks for the project
+                HttpResponseMessage apiResponse = await _taskServices.GetAllTaskByUserIDAsync(token, userId);
+
+                if (apiResponse.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await apiResponse.Content.ReadAsStringAsync();
+                    var taskDtos = JsonConvert.DeserializeObject<List<TaskDTO>>(jsonResponse);
+
+                    if (taskDtos != null)
+                    {
+                        foreach (var dto in taskDtos)
+                        {
+                            tasks.Add(new ViewTaskModel
+                            {
+                                Id = dto.Id,
+                                TaskName = dto.TaskName,
+                                StartDate = dto.StartDate,
+                                EndDate = dto.EndDate,
+                                Progress = dto.Progress,
+                                AssignedTo = dto.AssignedTo,
+                                Priority = dto.Priority,
+                                Description = dto.Description,
+                                ProjectId = dto.ProjectId
+                            });
+                        }
+
+                        if (!string.IsNullOrEmpty(progressFilter))
+                        {
+                            var parts = progressFilter.Split('-');
+                            if (parts.Length == 2 &&
+                                double.TryParse(parts[0], out double min) &&
+                                double.TryParse(parts[1], out double max))
+                            {
+                                tasks = tasks.Where(p => (p.Progress ?? 0) >= min && (p.Progress ?? 0) <= max).ToList();
+                            }
+                        }
+
+                    }
+                }
+                else
+                {
+                    string errorContent = await apiResponse.Content.ReadAsStringAsync();
+                    TempData["ErrorMessage"] = $"Failed to load tasks: {apiResponse.StatusCode}. Details: {errorContent}";
+                    Console.WriteLine($"Error fetching tasks: {apiResponse.StatusCode} - {errorContent}");
+                }
+            }
+            catch (HttpRequestException httpEx)
+            {
+                TempData["ErrorMessage"] = $"Could not connect to the task service. Please try again later. Error: {httpEx.Message}";
+                Console.WriteLine($"HttpRequestException in TaskController.ViewTask: {httpEx.Message}");
+            }
+            catch (JsonException jsonEx)
+            {
+                TempData["ErrorMessage"] = $"Failed to parse task data. Please try again later. Error: {jsonEx.Message}";
+                Console.WriteLine($"JsonException in TaskController.ViewTask: {jsonEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"An unexpected error occurred while loading tasks: {ex.Message}";
+                Console.WriteLine($"General Exception in TaskController.ViewTask: {ex.Message}");
+            }
+
+            // Step 5: Return the view with tasks
+            return View("ViewTaskMilestone", tasks);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewForeManProgress()
+        {
+            string? token = HttpContext.Session.GetString("JwtToken");
+            string? userIdString = HttpContext.Session.GetString("UserId");
+
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                TempData["ErrorMessage"] = "You need to be logged in to view tasks.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            HttpResponseMessage apiResponse = await _taskServices.GetAllTaskByUserIDAsync(token, userId);
+            List<TaskDTO> tasks = new();
+
+            if (apiResponse.IsSuccessStatusCode)
+            {
+                string jsonResponse = await apiResponse.Content.ReadAsStringAsync();
+                tasks = JsonConvert.DeserializeObject<List<TaskDTO>>(jsonResponse) ?? new List<TaskDTO>();
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Unable to load your tasks.";
+                return RedirectToAction("Dashboard", "Home");
+            }
+
+            // Treat each task as a milestone
+            int total = tasks.Count;
+            int completed = tasks.Count(t => t.Progress == 100);
+            int pending = total - completed;
+            double completionRate = total == 0 ? 0 : (double)completed / total * 100;
+
+            string performanceMessage;
+            string performanceLevel;
+
+            if (completionRate >= 80)
+            {
+                performanceMessage = "Excellent work! You're crushing it! 🚀";
+                performanceLevel = "high";
+            }
+            else if (completionRate >= 50)
+            {
+                performanceMessage = "You're doing good, but there's room to push harder! 💪";
+                performanceLevel = "medium";
+            }
+            else
+            {
+                performanceMessage = "Let's step it up! You’ve got what it takes. 👊";
+                performanceLevel = "low";
+            }
+
+            var viewModel = new ForemanProgressViewModel
+            {
+                TotalMilestones = total,
+                CompletedMilestones = completed,
+                PendingMilestones = pending,
+                CompletionRate = completionRate,
+                Message = performanceMessage,
+                PerformanceLevel = performanceLevel
+            };
+
+            return View(viewModel);
+        }
+       
+        [HttpGet]
+        public async Task<IActionResult> LeaderboardView()
+        {
+            string? token = HttpContext.Session.GetString("JwtToken");
+
+            HttpResponseMessage response = await _taskServices.GetLeaderboardAsync(token);
+            List<LeaderboardViewModel> leaderboard = new();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                leaderboard = JsonConvert.DeserializeObject<List<LeaderboardViewModel>>(json) ?? new List<LeaderboardViewModel>();
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Could not load leaderboard data.";
+            }
+
+            return View(leaderboard);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> LeaderboardViewAnalysis()
+        {
+            string? token = HttpContext.Session.GetString("JwtToken");
+
+            HttpResponseMessage response = await _taskServices.GetLeaderboardAsync(token);
+            List<LeaderboardViewModel> leaderboard = new();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                leaderboard = JsonConvert.DeserializeObject<List<LeaderboardViewModel>>(json) ?? new List<LeaderboardViewModel>();
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Could not load leaderboard data.";
+            }
+
+            return View(leaderboard);
+        }
+
+
+        [HttpGet]
+      
+
+        [HttpGet]
+        public async Task<IActionResult> NotificationView()
+        {
+            string? token = HttpContext.Session.GetString("JwtToken");
+            string? userIdStr = HttpContext.Session.GetString("UserId");
+
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
+                return RedirectToAction("Login", "Account");
+
+            HttpResponseMessage response = await _taskServices.GetNotificationsAsync(token, userId);
+            List<NotificationViewModel> notifications = new();
+
+            if (response.IsSuccessStatusCode)
+            {
+                string json = await response.Content.ReadAsStringAsync();
+                notifications = JsonConvert.DeserializeObject<List<NotificationViewModel>>(json) ?? new();
+            }
+
+            int unread = notifications.Count(n => !n.IsRead);
+            ViewBag.UnreadCount = unread;
+
+            return View(notifications);
+        }
+
+      
+
+        [HttpGet]
+        public async Task<IActionResult> SendNotificationView()
+        {
+            string? token = HttpContext.Session.GetString("JwtToken");
+
+            HttpResponseMessage response = await _taskServices.GetAllForemenAsync(token);
+            List<UserDto> foremen = new();
+
+            if (response.IsSuccessStatusCode)
+            {
+                string json = await response.Content.ReadAsStringAsync();
+                foremen = JsonConvert.DeserializeObject<List<UserDto>>(json) ?? new();
+            }
+
+            var viewModel = new SendNotificationViewModel
+            {
+                Foreman = foremen.Select(f => new SelectListItem
+                {
+                    Value = f.Id.ToString(),
+                    Text = f.Name
+                }).ToList()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendNotification(SendNotificationViewModel model)
+        {
+            var token = HttpContext.Session.GetString("JwtToken");
+            string? userIdStr = HttpContext.Session.GetString("UserId");
+
+            if (!ModelState.IsValid)
+            {
+                // Step 1: Call API to get HttpResponseMessage
+                HttpResponseMessage response = await _taskServices.GetAllForemenAsync(token);
+
+                List<UserDto> foremen = new List<UserDto>();
+
+                // Step 2: Deserialize JSON content
+                if (response.IsSuccessStatusCode )
+                {
+                    string json = await response.Content.ReadAsStringAsync();
+                    foremen = JsonConvert.DeserializeObject<List<UserDto>>(json) ?? new List<UserDto>();
+                }
+
+                // Step 3: Map to SelectListItem
+                model.Foreman = foremen.Select(f => new SelectListItem
+                {
+                    Value = f.Id.ToString(),
+                    Text = f.Name
+                }).ToList();
+
+               
+                return View(model);
+            }
+            int.TryParse(userIdStr, out int userId);
+            // Prepare DTO for sending notification
+            var dto = new SendNotificationDTO
+            {
+                SenderId = userId,
+                RecipientId = model.RecipientId,
+                Message = model.Message
+            };
+
+            // Send notification
+            var sendResponse = await _taskServices.SendNotificationAsync(token, dto);
+
+            if (sendResponse.IsSuccessStatusCode)
+            {
+                TempData["Success"] = "Notification sent successfully!";
+                return RedirectToAction("SendNotification");
+            }
+
+            string errorDetails = await sendResponse.Content.ReadAsStringAsync();
+            Console.WriteLine($"SendNotification failed. Status: {sendResponse.StatusCode}, Details: {errorDetails}");
+
+            TempData["Error"] = $"Failed to send message to {model.RecipientId} by {userId}. " +
+                    $"Status: {sendResponse.StatusCode}, Reason: {sendResponse.ReasonPhrase}, " +
+                    $"Details: {errorDetails}";
+
+            // Reload foremen list if sending fails and return view
+            HttpResponseMessage retryResponse = await _taskServices.GetAllForemenAsync(token);
+            List<UserDto> retryForemen = new List<UserDto>();
+            if (retryResponse.IsSuccessStatusCode)
+            {
+                string retryJson = await retryResponse.Content.ReadAsStringAsync();
+                retryForemen = JsonConvert.DeserializeObject<List<UserDto>>(retryJson) ?? new List<UserDto>();
+            }
+            model.Foreman = retryForemen.Select(f => new SelectListItem
+            {
+                Value = f.Id.ToString(),
+                Text = f.Name
+            }).ToList();
+
+            return View(model);
+        }
+
         // GET: /Task/CreateTask
         // Display the form to create a new task
         [HttpGet]
         public async Task<IActionResult> CreateTask(int? projectId = null)
         {
-            int? currentProjectId = projectId ?? HttpContext.Session.GetInt32("ProjectId");
+            // Plan A: From Route
+            int? currentProjectId = projectId;
 
+            // Plan B: From Session
+            if (!currentProjectId.HasValue)
+            {
+                string? projectIdString = HttpContext.Session.GetString("ProjectId");
+                if (!string.IsNullOrEmpty(projectIdString) && int.TryParse(projectIdString, out int sessionProjectId))
+                {
+                    currentProjectId = sessionProjectId;
+                }
+            }
+
+            // Plan C: Redirect if no project ID
             if (!currentProjectId.HasValue)
             {
                 TempData["ErrorMessage"] = "Please create or select a project first before creating tasks.";
                 return RedirectToAction("ProjectView", "Project");
             }
 
-            string? token = HttpContext.Session.GetString("AccessToken");
+           
+            string? token = HttpContext.Session.GetString("JwtToken");
+            //if (string.IsNullOrEmpty(token))
+            //{
+            //    TempData["ErrorMessage"] = "You are not authorized.";
+            //    return RedirectToAction("Login", "Account"); // Or wherever you handle auth
+            //}
 
-            var foremenList = await _taskServices.GetUsersForDropdownAsync(token);
+            // 👇 Call your service to fetch users
+            var userDropdown = await _taskServices.GetUsersForDropdownAsync(token);
 
-            // Debug: Log the foremen list
-            Console.WriteLine($"Retrieved {foremenList.Count} foremen for dropdown:");
-            foreach (var foreman in foremenList)
-            {
-                Console.WriteLine($"  ID: {foreman.Value}, Name: {foreman.Text}");
-            }
-
+            // ✅ Build ViewModel
             var model = new CreateTaskViewModel
             {
                 ProjectId = currentProjectId.Value,
-                Users = foremenList
+                Users = userDropdown
             };
 
             ViewBag.ProjectId = currentProjectId.Value;
@@ -156,50 +486,40 @@ public async Task<IActionResult> ViewTask(int? projectId)
         }
 
 
-
-        // POST: /Task/CreateTask
-        // POST: /Task/CreateTask
         // POST: /Task/CreateTask
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTask(CreateTaskViewModel model)
         {
-            // Debug: Log everything received
-            Console.WriteLine("=== DEBUGGING FORM SUBMISSION ===");
-            Console.WriteLine($"TaskName: {model.TaskName}");
-            Console.WriteLine($"Description: {model.Description}");
-            Console.WriteLine($"ProjectId: {model.ProjectId}");
-            Console.WriteLine($"AssignedTo: {model.AssignedTo}");
-            Console.WriteLine($"Priority: {model.Priority}");
 
-            // Debug: Log all form values from Request.Form
-            Console.WriteLine("\n=== RAW FORM VALUES ===");
-            foreach (var key in Request.Form.Keys)
-            {
-                Console.WriteLine($"{key}: {Request.Form[key]}");
-            }
-
-            // Debug: Check model state
-            Console.WriteLine("\n=== MODEL STATE ===");
-            Console.WriteLine($"ModelState.IsValid: {ModelState.IsValid}");
             if (!ModelState.IsValid)
             {
-                foreach (var kvp in ModelState)
+                
+                var users = new List<SelectListItem>
                 {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        Console.WriteLine($"Key: {kvp.Key}, Error: {error.ErrorMessage}");
-                    }
-                }
+                    new SelectListItem { Value = "1", Text = "Jane Doe" },
+                    new SelectListItem { Value = "2", Text = "John Smith" },
+                    new SelectListItem { Value = "3", Text = "Mike Johnson" },
+                    new SelectListItem { Value = "4", Text = "Sarah Lee" }
+                };
+                model.Users = users;
+                return View(model);
             }
 
-            // For now, let's skip validation and just try to create the task
-            // We'll add validation back once we confirm the basic flow works
 
-            string? jwtToken = HttpContext.Session.GetString("JwtToken");
+            string? token = HttpContext.Session.GetString("JwtToken");
+            string? userIdString = HttpContext.Session.GetString("UserId");
+
+            //if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            //{
+            //    TempData["ErrorMessage"] = "You need to be logged in to create a task.";
+            //    return RedirectToAction("Login", "Account");
+            //}
+
 
             if (model.ProjectId <= 0)
             {
+
                 string? projectIdString = HttpContext.Session.GetString("ProjectId");
                 if (!string.IsNullOrEmpty(projectIdString) && int.TryParse(projectIdString, out int sessionProjectId))
                 {
@@ -211,28 +531,23 @@ public async Task<IActionResult> ViewTask(int? projectId)
                     return RedirectToAction("CreateProject", "Project");
                 }
             }
+            
 
-            // Debug: Check if AssignedTo has a valid value
-            Console.WriteLine($"\n=== FINAL VALUES BEFORE API CALL ===");
-            Console.WriteLine($"Final AssignedTo value: {model.AssignedTo}");
-
-            // Create DTO regardless of validation for debugging
             var taskDto = new AddTaskDTO
             {
-                TaskName = model.TaskName ?? "Test Task",
-                Description = model.Description ?? "Test Description",
-                Startdate = model.Startdate != default ? model.Startdate : DateTime.Now,
-                Enddate = model.Enddate != default ? model.Enddate : DateTime.Now.AddDays(1),
-                Priority = model.Priority ?? "Low",
+                TaskName = model.TaskName,
+                Description = model.Description,
+                Startdate = model.Startdate,
+                Enddate = model.Enddate,
+                Priority = model.Priority,
                 ProjectId = model.ProjectId,
-                AssignedTo = model.AssignedTo.ToString() // Convert int to string here
+                UserId = model.UserId,
             };
-
-            Console.WriteLine($"TaskDTO AssignedTo: {taskDto.AssignedTo}");
 
             try
             {
-                HttpResponseMessage apiResponse = await _taskServices.CreateTaskAsync(taskDto, jwtToken);
+
+                HttpResponseMessage apiResponse = await _taskServices.CreateTaskAsync(taskDto, token);
 
                 if (apiResponse.IsSuccessStatusCode)
                 {
@@ -242,23 +557,51 @@ public async Task<IActionResult> ViewTask(int? projectId)
                 else
                 {
                     string errorContent = await apiResponse.Content.ReadAsStringAsync();
-                    Console.WriteLine($"API Error: {apiResponse.StatusCode} - {errorContent}");
-                    TempData["ErrorMessage"] = $"Task creation failed: {apiResponse.StatusCode}. Details: {errorContent}";
+                    ModelState.AddModelError(string.Empty, $"Task creation failed: {apiResponse.StatusCode}. Details: {errorContent}");
 
-                    // Reload dropdown on error
-                    string? token = HttpContext.Session.GetString("AccessToken");
-                    model.Users = await _taskServices.GetUsersForDropdownAsync(token);
+                   
+                    var users = new List<SelectListItem>
+                    {
+                        new SelectListItem { Value = "1", Text = "Mabuza Junior" },
+                        new SelectListItem { Value = "2", Text = "Maite Selowa" },
+                        new SelectListItem { Value = "3", Text = "George Zwane" },
+                        new SelectListItem { Value = "4", Text = "L Phiri" }
+                    };
+                    model.Users = users;
+
                     return View(model);
                 }
             }
+            catch (HttpRequestException httpEx)
+            {
+                ModelState.AddModelError(string.Empty, $"Could not connect to the task creation service. Error: {httpEx.Message}");
+
+               
+                var users = new List<SelectListItem>
+                {
+                        new SelectListItem { Value = "1", Text = "Mabuza Junior" },
+                        new SelectListItem { Value = "2", Text = "Maite Selowa" },
+                        new SelectListItem { Value = "3", Text = "George Zwane" },
+                        new SelectListItem { Value = "4", Text = "L Phiri" }
+                };
+                model.Users = users;
+
+                return View(model);
+            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception: {ex.Message}");
-                TempData["ErrorMessage"] = $"An error occurred: {ex.Message}";
+                ModelState.AddModelError(string.Empty, $"An unexpected error occurred: {ex.Message}");
 
-                // Reload dropdown on error
-                string? token = HttpContext.Session.GetString("AccessToken");
-                model.Users = await _taskServices.GetUsersForDropdownAsync(token);
+               
+                var users = new List<SelectListItem>
+                {
+                        new SelectListItem { Value = "1", Text = "Mabuza Junior" },
+                        new SelectListItem { Value = "2", Text = "Maite Selowa" },
+                        new SelectListItem { Value = "3", Text = "George Zwane" },
+                        new SelectListItem { Value = "4", Text = "L Phiri" }
+                };
+                model.Users = users;
+
                 return View(model);
             }
         }
@@ -289,14 +632,7 @@ public async Task<IActionResult> ViewTask(int? projectId)
             new TaskMetric { Title = "In Progress", Value = overview.InProgressTasks.ToString(), IsOverdue = false }
         },
 
-                OverdueTasks = new List<TaskDetail>
-        {
-            new TaskDetail { TaskName = "Finalize design mockups", AssignedTo = "Jane Doe", DueDate = DateTime.Parse("2025-07-28"), OverdueBy = "8 days" },
-            new TaskDetail { TaskName = "Implement user authentication", AssignedTo = "John Smith", DueDate = DateTime.Parse("2025-07-30"), OverdueBy = "6 days" },
-            new TaskDetail { TaskName = "Write API documentation", AssignedTo = "Mike Johnson", DueDate = DateTime.Parse("2025-08-01"), OverdueBy = "4 days" },
-            new TaskDetail { TaskName = "Perform load testing", AssignedTo = "Jane Doe", DueDate = DateTime.Parse("2025-08-04"), OverdueBy = "1 day" },
-            new TaskDetail { TaskName = "Database schema review", AssignedTo = "Sarah Lee", DueDate = DateTime.Parse("2025-07-25"), OverdueBy = "11 days" }
-        },
+               
 
                 ChartLabels = new List<string> { "Completed", "In Progress", "Overdue", "Not Started" },
                 ChartValues = new List<int>

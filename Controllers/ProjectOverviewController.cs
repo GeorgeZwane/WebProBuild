@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Evaluation;
+using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using NuGet.Common;
 using WebSpaceApp.Models;
@@ -16,10 +18,10 @@ namespace WebSpaceApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ProjectOverview()
+        public async Task<IActionResult> ProjectOverview(int projectId)
         {
             string? token = HttpContext.Session.GetString("JwtToken");
-
+            HttpContext.Session.SetString("ProjectId", projectId.ToString());
             HttpResponseMessage response = await _projectServices.GetProjectAndTaskCountsAsync(token);
             if (!response.IsSuccessStatusCode)
             {
@@ -28,6 +30,10 @@ namespace WebSpaceApp.Controllers
             }
 
             string json = await response.Content.ReadAsStringAsync();
+
+            await _projectServices.UpdateProjectAsync(token, projectId);
+            await _projectServices.UpdateTaskAsync(token, projectId);
+
             var result = JsonConvert.DeserializeObject<OverviewModel>(json);
 
             Console.WriteLine($"Tasks => Total: {result.TotalTasks}, Complete: {result.CompleteTasks}, In Progress: {result.InProgressTasks}, Incomplete: {result.InWaitingTasks}");
