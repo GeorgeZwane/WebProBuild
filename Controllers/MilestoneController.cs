@@ -21,8 +21,6 @@ namespace WebSpaceApp.Controllers
         [HttpGet]
         public async Task<IActionResult> MilestoneView(Guid Id)
         {
-            string? userRole = HttpContext.Session.GetString("UserRole");
-            ViewBag.UserRole = userRole ?? "Unknown";
             // Call the service to get milestones for the specified taskId from the API.
             try
             {
@@ -80,9 +78,7 @@ namespace WebSpaceApp.Controllers
 
                 if (response.IsSuccessStatusCode)
                 {
-                   // FIXED: Use 'Id' instead of 'taskId' to match the MilestoneView parameter
-                     return RedirectToAction("MilestoneView", "Milestone", new { Id = model.TaskEntityId });
-                    
+                    return RedirectToAction("ViewTask", "Task", new { taskId = model.TaskEntityId });
                 }
                 else
                 {
@@ -93,18 +89,16 @@ namespace WebSpaceApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> UpdateMilestone(Guid id)
+        public async Task<IActionResult> UpdateMilestone(Guid milestoneId)
         {
-            string? userRole = HttpContext.Session.GetString("UserRole");
-           
             try
             {
-                var milestone = await _milestoneServices.GetMilestoneByIdAsync(id);
+                var milestone = await _milestoneServices.GetMilestoneByIdAsync(milestoneId);
 
                 if (milestone == null)
                 {
                     ViewBag.ErrorMessage = "Milestone not found.";
-                    return RedirectToAction("Error");
+                    return RedirectToAction("Error"); // Redirect to a generic error page or similar.
                 }
 
                 var model = new MilestoneUpdate
@@ -112,10 +106,9 @@ namespace WebSpaceApp.Controllers
                     Id = milestone.Id,
                     MilestoneName = milestone.MilestoneName,
                     Status = milestone.Status,
-                    Reason = milestone.Reason,
-                    TaskEntityId = milestone.TaskEntityId 
+                    Reason = milestone.Reason
                 };
-                ViewBag.UserRole = userRole ?? "Unknown";
+
                 return View(model);
             }
             catch (HttpRequestException ex)
@@ -125,7 +118,9 @@ namespace WebSpaceApp.Controllers
             }
         }
 
+        // Action to handle the form submission for updating a milestone.
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(MilestoneUpdate model)
         {
             if (!ModelState.IsValid)
@@ -135,6 +130,7 @@ namespace WebSpaceApp.Controllers
 
             try
             {
+                // Create a DTO to send to the service
                 var updateDto = new UpdateMilestoneDTO
                 {
                     Id = model.Id,
@@ -146,15 +142,10 @@ namespace WebSpaceApp.Controllers
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // 🔁 Fetch the milestone again to get the correct TaskEntityId
-                    var updatedMilestone = await _milestoneServices.GetMilestoneByIdAsync(model.Id);
-
-                    if (updatedMilestone == null || updatedMilestone.TaskEntityId == Guid.Empty)
-                    {
-                        return RedirectToAction("Error");
-                    }
-
-                    return RedirectToAction("MilestoneView", "Milestone", new { Id = updatedMilestone.TaskEntityId });
+                    // Redirect to the milestone view for the specific task
+                    // You'll need to get the taskId from somewhere, e.g., the model.
+                    // Assuming you can get the task ID from the milestone's model.
+                    return RedirectToAction("MilestoneView", new { taskId = model.Id });
                 }
                 else
                 {
@@ -168,8 +159,5 @@ namespace WebSpaceApp.Controllers
                 return View("UpdateMilestone", model);
             }
         }
-
     }
-
-
 }

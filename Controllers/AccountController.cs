@@ -134,7 +134,7 @@ namespace WebSpaceApp.Controllers
                         HttpContext.Session.SetString("UserId", loginResponse.UserId.ToString());
                         HttpContext.Session.SetString("UserRole", loginResponse.UserRole.ToString());
                         HttpContext.Session.SetString("UserName", loginResponse.UserName.ToString());
-                        
+                        //HttpContext.Session.SetString("JwtToken", loginResponse.Token.ToString());
                         //Console.WriteLine($"JWT Token stored in session: {loginResponse.Token.Substring(0, Math.Min(loginResponse.Token.Length, 30))}..."); // Log a partial token for verification
                     }
                     else
@@ -153,8 +153,8 @@ namespace WebSpaceApp.Controllers
                             return RedirectToAction("ProjectView", "Project");
                         case "Director":
                             return RedirectToAction("ProjectOverview", "ProjectOverview");
-                        case "Foremen":
-                            return RedirectToAction("ViewTask", "Task");
+                        case "Foreman":
+                            return RedirectToAction("ViewTaskMilestone", "Task");
 
                         default:
                             return RedirectToAction("Index", "Home");
