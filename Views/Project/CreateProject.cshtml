@@ -1,0 +1,65 @@
+﻿@model WebSpaceApp.Models.CreateProjectViewModel
+@{
+    ViewData["Title"] = "CreateProject";
+    TempData["SuccessMessage"] = "SuccessMessage";
+} 
+
+<section class="contact_section layout_padding">
+    <div class="contact_bg_box">
+        <div class="img-box">
+            <img src="~/images/image5.jpg" alt="Project Image" />
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="heading_container heading_center">
+            <h2>CREATE PROJECT</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-md-7 mx-auto">
+                @using (Html.BeginForm("CreateProject", "Project", FormMethod.Post))
+                {
+                    <div class="contact_form-container">
+                        <div>
+                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "Project Name" })
+                            @Html.TextBoxFor(m => m.Location, new { @class = "form-control", placeholder = "Location" })
+                            @Html.TextBoxFor(m => m.Startdate, new { @class = "form-control", placeholder = "Start Date", type = "date" })
+                            @Html.TextBoxFor(m => m.Enddate, new { @class = "form-control", placeholder = "Deadline", type = "date" })
+                            @Html.TextBoxFor(m => m.Budget, new { @class = "form-control", placeholder = "Budget" })
+                            @Html.TextBoxFor(m => m.Description, new { @class = "form-control", placeholder = "Project Description" })
+
+
+                            <div class="btn-box">
+                                <button type="submit" class="btn btn-primary">CREATE</button>
+                            </div>
+
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div> 
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var successMessage = '@TempData["SuccessMessage"]';
+
+            if (successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: successMessage,
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+            }
+        });
+    </script>
+    }
+</section>
+

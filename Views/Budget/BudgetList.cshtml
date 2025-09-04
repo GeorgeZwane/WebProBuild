@@ -1,0 +1,212 @@
+﻿@model WebSpaceApp.Models.BudgetListViewModel
+@{
+    ViewData["Title"] = "Budget List";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: whitesmoke;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+            .sidebar .logo {
+                font-size: 22px;
+                font-weight: bold;
+                margin-bottom: 30px;
+                color: #f5a623;
+                padding: 20px;
+            }
+
+            .sidebar .nav-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                flex-grow: 1;
+            }
+
+                .sidebar .nav-list li {
+                    padding: 12px 10px;
+                    margin-bottom: 8px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                }
+
+                    .sidebar .nav-list li:hover,
+                    .sidebar .nav-list li.active {
+                        background-color: #ff8c00;
+                        color: #212529;
+                        font-weight: bold;
+                    }
+
+        .main-content {
+            flex: 1;
+            padding: 20px 40px;
+            overflow-y: auto;
+            background-color: #fff;
+            overflow-y: auto;
+        }
+
+        .header {
+            background-color: #000000;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+            .header .back {
+                font-size: 24px;
+                cursor: pointer;
+                color: #fff;
+            }
+
+            .header .title {
+                font-size: 24px;
+                margin: 0;
+                color: #fff;
+                font-weight: bold;
+            }
+
+            .header .time {
+                font-size: 15px;
+                margin: 0;
+                color: #fff;
+                font-weight: bold;
+            }
+        .table-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .budget-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+            .budget-table th,
+            .budget-table td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .budget-table th {
+                background-color: #000000;
+                color: #fff;
+                font-weight: bold;
+            }
+
+            .budget-table tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+
+            .budget-table tr:hover {
+                background-color: #f5f5f5;
+            }
+
+        .no-entries {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">Budget</div>
+            <ul class="nav-list">
+              
+                <li >
+                    <a href="@Url.Action("BudgetList", "Budget")">Budget List</a>
+                </li>
+                @if (ViewBag.UserRole == "Director" || ViewBag.UserRole == "Project Manager")
+                {
+                    <li>
+                        <a href="@Url.Action("MaterialInventory", "MaterialInventory")">Cost Tracking</a>
+                    </li>
+                }
+                <li>
+                    <a href="@Url.Action("BudgetEntry", "Budget")">Add Budget</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("BudgetReport", "Budget")">Reports </a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Logout", "Account")">Log out</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <span class="back"> </span>
+                <h1 class="title">Budget List</h1>
+                <span class="time">@DateTime.Now.ToString("HH:mm")</span>
+            </div>
+
+            <div class="table-container">
+                @if (Model.BudgetEntries == null || !Model.BudgetEntries.Any())
+                {
+                    <div class="no-entries">No budget entries found.</div>
+                }
+                else
+                {
+                    <table class="budget-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in Model.BudgetEntries)
+                            {
+                                <tr>
+                                    <td>@entry.Category</td>
+                                    <td>R @entry.Amount.ToString("N2")</td>
+                                    <td>@entry.Description</td>
+                                    <td>@entry.Date.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>

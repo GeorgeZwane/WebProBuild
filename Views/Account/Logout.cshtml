@@ -1,0 +1,124 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f1f1f1;
+            display: flex;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-content {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #fff;
+            text-align: center;
+        }
+
+        .header {
+            background-color: #f5a623;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+            .header .back {
+                font-size: 24px;
+                cursor: pointer;
+                color: #fff;
+            }
+
+            .header .title {
+                font-size: 24px;
+                margin: 0;
+                color: #fff;
+                font-weight: bold;
+                flex-grow: 1;
+                text-align: center;
+            }
+
+        .logout-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .logout-message {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .thank-you-message {
+            color: #155724;
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .btn-option {
+            background-color: #f5a623;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+            .btn-option:hover {
+                background-color: #e59400;
+            }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="header">
+            <span class="back">←</span>
+            <h1 class="title">Logout</h1>
+            <span>@DateTime.Now.ToString("HH:mm")</span>
+        </div>
+
+        <div class="logout-container">
+            @if (TempData["LoggedOut"] != null && (bool)TempData["LoggedOut"])
+            {
+                <div class="logout-message">Are you sure you want to log out?</div>
+                <a href="@Url.Action("Logout", "Account")" class="btn-option">Logout</a>
+                
+            }
+            else
+            {
+                <div class="thank-you-message">Thank you for using ProBuild! You have been logged out successfully.</div>
+                <a href="@Url.Action("Login", "Account")" class="btn-option">Log In Again</a>
+                <a href="@Url.Action("Index", "Home")" class="btn-option">Go to Home</a>
+            }
+        </div>
+    </div>
+</body>
+</html>

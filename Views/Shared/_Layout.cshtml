@@ -1,0 +1,214 @@
+﻿
+<!DOCTYPE html>
+
+<html>
+<head>
+    <!-- Basic -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!-- Site Metas -->
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
+
+    <title>PROBUILD Construction</title>
+
+
+
+    <!-- Sweet arlt -->
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- bootstrap core css -->
+    <link href="~/css/bootstrap.css" rel="stylesheet" />
+
+    <!-- Custom styles for this template -->
+    <link href="~/css/style.css" rel="stylesheet" />
+    <!-- responsive style -->
+    <link href="~/css/responsive.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="hero_area">
+        <!-- header section strats -->
+        <div class="hero_bg_box">
+            <div class="img-box">
+                <img src="images/ProBuild.png" alt="">
+            </div>
+        </div>
+
+        <header class="header_section">
+          
+            <div class="header_bottom">
+                <div class="container-fluid">
+                    <nav class="navbar navbar-expand-lg custom_nav-container">
+                        <a class="navbar-brand" href="@Url.Action("Dashboard", "Project")">
+                            <span>ProBuildManager</span>
+                        </a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class=""></span>
+                        </button>
+                        <div class="collapse navbar-collapse ml-auto" id="navbarSupportedContent">
+                            @{
+                               string userName = Context.Session.GetString("UserName");
+                                string userRole = Context.Session.GetString("UserRole");
+
+
+                                var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+                                var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+
+                                bool isLoginPage = currentController == "Account" && currentAction == "Login";
+                                bool isRegisterPage = currentController == "Account" && currentAction == "Register";
+                                bool isHomePage = currentController == "Home" && currentAction == "Index";
+
+                                bool isCreateTask = currentController == "Task" && currentAction == "CreateTask";
+                                bool isAddMaterials = currentController == "MaterialInventory" && currentAction == "AddMaterials";
+                                bool isCreateProject = currentController == "Project" && currentAction == "CreateProject";
+                                bool isProjectView = currentController == "Project" && currentAction == "ProjectView";
+                                bool isProjectOverview = currentController == "ProjectOverview" && currentAction == "ProjectOverview";
+                                bool isInventory = currentController == "Inventory" && currentAction == "Index";
+                                bool isAdmin = currentController == "Admin" && currentAction == "Index";
+                                bool isAddTeam = currentController == "Team" && currentAction == "AddTeam";
+                                
+                            }
+
+                            <ul class="navbar-nav">
+
+                                @if (isLoginPage)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="@Url.Action("Register", "Account")">Register</a>
+                                    </li>
+                                }
+                                else if (isRegisterPage)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="@Url.Action("Login", "Account")">Login</a>
+                                    </li>
+                                }
+                                else if (isHomePage)
+                                {
+                                    <!-- On Home page, show both Login and Register -->
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="@Url.Action("Login", "Account")">Login</a>
+                                    </li>
+                                    @* <li class="nav-item">
+                                        <a class="nav-link" href="@Url.Action("Register", "Account")">Register</a>
+                                    </li> *@
+                                }
+                                else
+                                {
+
+                                    @if (!string.IsNullOrEmpty(userRole))
+                                    {
+                                        switch (userRole)
+                                        {
+                                            case "Foremen":
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("ProjectView", "Project")">Assigned Projects</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("MilestoneView", "Milestone")">Milestones</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("DocumentView", "Document")">document</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("DocumentUpload", "Document")">Udocument</a>
+                                                </li>
+                                                break;
+
+                                            case "Project Manager":
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("CreateProject", "Project")">Create Project</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("ProjectView", "Project")">Manage Projects</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("CreateTask", "Task")">Assign Tasks</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("DocumentView", "Document")">document</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("DocumentUpload", "Document")">Udocument</a>
+                                                </li>
+                                                break;
+
+                                            case "Director":
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("Dashboard", "Project")">Executive Dashboard</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("Reports", "Analytics")">Reports</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("TeamOverview", "Team")">Team Overview</a>
+                                                </li>
+                                                break;
+
+                                            case "Admin":
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("Index", "Admin")">Admin Panel</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("UserManagement", "Admin")">User Management</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="@Url.Action("SystemLogs", "Admin")">System Logs</a>
+                                                </li>
+                                                break;
+                                        }
+                                    }
+
+
+                                }
+
+                                @if (!string.IsNullOrEmpty(userName))
+                                {
+                                   
+
+
+                                    <li class="nav-item">
+                                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+                                            Hello, @userName
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="@Url.Action("Logout", "Account")">Logout</a>
+                                    </li>
+
+
+                                   
+                                }
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+
+
+        @RenderSection("SliderSection", required: false)
+        @RenderBody()
+        @RenderSection("Scripts", required: false)
+
+
+
+
+        <!-- end info_section -->
+        <!-- footer section -->
+        <footer class="container-fluid footer_section">
+            <p>
+                2025 &copy; <span id="currentYear"></span> All Rights Reserved.
+                <a href="https://html.design/">ThobileM Construction Pty Ltd</a>
+            </p>
+        </footer>
+        <!-- footer section -->
+
+
+</body>
+</html>

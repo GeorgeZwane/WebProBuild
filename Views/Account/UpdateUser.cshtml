@@ -1,0 +1,151 @@
+﻿@model WebSpaceApp.Models.RegisterUpdate
+@{
+    ViewData["Title"] = "UpdateUser";
+}
+
+
+
+
+@* <div class="sidebar">
+    <h2>ProBuild</h2>
+    <ul>
+        <li class="active">Project Overview</li>
+        <li>Add Materials</li>
+        <li>View Materials</li>
+        <li>Team</li>
+        <li>Budget</li>
+        <li class="active">Register User</li>
+        <li>Log out</li>
+    </ul>
+</div> *@
+
+<div class="content">
+    <h2>Register User</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="color: green; font-weight: bold;">@TempData["SuccessMessage"]</div>
+    }
+
+    @using (Html.BeginForm("Register", "User", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <label for="name">Name:</label>
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Name)
+
+        <label for="surname">Surname:</label>
+        @Html.TextBoxFor(m => m.Surname, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Surname)
+
+        <label for="dob">Date of Birth:</label>
+        @Html.TextBoxFor(m => m.Dob, new { @type = "date", @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Dob)
+
+        <label for="cellNo">Cell Number:</label>
+        @Html.TextBoxFor(m => m.CellNo, new { @class = "form-control", placeholder = "e.g., 0821234567" })
+        @Html.ValidationMessageFor(m => m.CellNo)
+
+        <label for="email">Email Address:</label>
+        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Email)
+
+        <label for="address">Address:</label>
+        @Html.TextBoxFor(m => m.Address, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Address)
+
+        <button type="submit">Register User</button>
+    }
+</div>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+    }
+
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        background-color: #1a1a2e;
+        color: white;
+        position: fixed;
+        padding-top: 20px;
+    }
+
+        .sidebar h2 {
+            color: #ffca2c;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+            .sidebar ul li {
+                padding: 15px 20px;
+                cursor: pointer;
+                color: #00aaff;
+                font-size: 16px;
+            }
+
+                .sidebar ul li:hover {
+                    background-color: #ffca2c;
+                    color: #1a1a2e;
+                }
+
+                .sidebar ul li.active {
+                    background-color: #ffca2c;
+                    color: #1a1a2e;
+                    font-weight: bold;
+                }
+
+    .content {
+        margin-left: 270px;
+        padding: 20px;
+    }
+
+    form {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #ff6200;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        button:hover {
+            background-color: #e55a00;
+        }
+</style>
+
+

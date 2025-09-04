@@ -1,0 +1,515 @@
+﻿@model WebSpaceApp.Models.OverviewModel
+
+@{
+    ViewData["Title"] = "Project Overview";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #f1f1f1;
+    }
+
+    .container {
+        display: flex;
+        height: 100vh;
+    }
+
+    .sidebar {
+        width: 220px;
+        background-color: whitesmoke;
+        color: #fff;
+        display: flex;
+
+        flex-direction: column;
+        padding: 10px;
+    }
+
+        .sidebar .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: black;
+        }
+
+        .sidebar .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+            .sidebar .nav-list li {
+                padding: 12px 10px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+                .sidebar .nav-list li:hover,
+                .sidebar .nav-list li.active {
+                    background-color: darkorange;
+                    color: #212529;
+                    font-weight: bold;
+                }
+
+    .main-content {
+        flex: 1;
+        padding: 20px 40px;
+        overflow-y: auto;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+        .header input[type="text"] {
+            padding: 8px 12px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+    .header-icons span {
+        margin-left: 20px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .recent-activity h2 {
+        margin-bottom: 20px;
+        color: black;
+    }
+
+    .activity-cards {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+        .activity-cards .card {
+            background-color: #fff;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            flex: 1 1 150px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+            .activity-cards .card span {
+                display: block;
+                font-size: 28px;
+                font-weight: bold;
+                color: #212529;
+            }
+
+            .activity-cards .card p {
+                margin: 10px 0 0 0;
+                color: #555;
+            }
+
+    .view-more {
+        background-color: #212529;
+        color: #fff;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .dashboard-row {
+        display: flex;
+        gap: 40px;
+        margin-top: 40px;
+        flex-wrap: wrap;
+    }
+
+    .material-usage,
+    .top-materials {
+        background-color: #fff;
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        padding: 20px;
+        flex: 1 1 300px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+        .material-usage h2,
+        .top-materials h2 {
+            margin-bottom: 20px;
+            color: #212529;
+        }
+
+    .chart {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .bar {
+        height: 25px;
+        background-color: #ccc;
+        border-radius: 4px;
+        text-align: center;
+        line-height: 25px;
+        color: #212529;
+        font-weight: bold;
+    }
+
+        .bar.order {
+            background-color: #007bff;
+        }
+
+        .bar.delivered {
+            background-color: #28a745;
+        }
+
+        .bar.used {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .bar.wasted {
+            background-color: #dc3545;
+        }
+
+    .material-cards {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .material-card {
+        background-color: #f8f9fa;
+        border: 1px solid #ccc;
+        font-size: 32px;
+        padding: 20px;
+        border-radius: 6px;
+    }
+
+    .view-all {
+        margin-top: 20px;
+        background-color: #212529;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+   
+</style>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="logo">Main Menu</div>
+        <ul class="nav-list">
+            <li class="active">
+                <a href="@Url.Action("ProjectOverview", "ProjectOverview")">Overview</a>
+            </li>
+@*             <li>
+                <a href="@Url.Action("CreateProject", "Project")">Create Project</a>
+            </li> *@
+            <li>
+                <a href="@Url.Action("CompleteProjects", "Project")">Projects</a>
+            </li>
+            <li>
+                <a href="@Url.Action("TaskReport", "Task")">Task Reports</a>
+            </li>
+          @*   <li>
+                <a href="@Url.Action("ProjectsViewAll", "Project")">All Projects</a>
+            </li> *@
+            @* <li>
+                <a href="@Url.Action("ViewTask", "Task")">Ta</a>
+            </li> *@
+           @*  <li>
+                <a href="@Url.Action("AddTeamView", "Project")">Add Team</a>
+            </li> *@
+            <li>
+                <a href="@Url.Action("Logout", "Account")">Log out</a>
+            </li> 
+        </ul>
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+           @*  <input type="text" placeholder="Search"> *@
+            @* <div class="header-icons">
+                <span>+</span>
+                <span>🔔</span>
+                <span>👤</span>
+            </div >*@
+        </div>
+
+
+       
+        <div class="recent-activity">
+            <center><h2>Task Project</h2></center>
+            <div class="activity-cards">
+                <div class="card">
+                    <span>@Model.ProjectCount</span>
+                    <p>Total Number of Projects</p>
+                </div>
+                <div class="card">
+                    <span>@Model.CompleteProjects</span>
+                    <p>Complete Project</p>
+                </div>
+                <div class="card">
+                    <span>@Model.InProgressProjects</span>
+                    <p>In progress Project</p>
+                </div>
+                <div class="card">
+                    <span>@Model.InWaitingProjects</span>
+                    <p>InWaiting Project</p>
+                </div>
+                <div class="card">
+                    <span>Total Amount Spent</span>
+                    <p>R @Model.TotalBudget</p>
+                    <form asp-controller="Budget" asp-action="BudgetList" method="get">
+                        <button type="submit" class="view-more">See breakdown</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="recent-activity">
+            <br />
+            <center><h2>Task Activity</h2></center>
+            <div class="activity-cards">
+                <div class="card">
+                    <span>@Model.TotalTasks</span>
+                    <p>Total Number of Tasks</p>
+                </div>
+                <div class="card">
+                    <span>@Model.CompleteTasks</span>
+                    <p>Complete Task</p>
+                </div>
+                <div class="card">
+                    <span>@Model.InProgressTasks</span>
+                    <p>In progress tasks</p>
+                </div>
+                <div class="card">
+                    <span>@Model.InWaitingTasks</span>
+                    <p>InWaiting tasks</p>
+                </div>
+            </div>
+        </div>
+        <!-- Chart.js CDN -->
+        <!-- Chart.js CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <!-- Flex container for horizontal layout -->
+        <div style="display: flex; justify-content: space-around; align-items: flex-start; flex-wrap: wrap; gap: 20px; margin-top: 40px;">
+
+            <!-- Project Chart -->
+            <div style="text-align: center;">
+                <h2>Project Metrics</h2>
+                <canvas id="projectChart" width="300" height="300"></canvas>
+            </div>
+
+            <!-- Task Chart -->
+            <div style="text-align: center;">
+                <h2>Task Metrics</h2>
+                <canvas id="taskChart" width="300" height="300"></canvas>
+            </div>
+
+        </div>
+
+        <div style="margin-top: 40px;">
+            <center><h2>All Project Insights</h2></center>
+            <div style="background-color: #f9f9f9; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>
+                        <strong>Total Projects:</strong> @Model.ProjectCount
+                    </li>
+                    <li>
+                        <strong>Completed Projects:</strong> @Model.CompleteProjects
+                        @if (Model.CompleteProjects == 0)
+                        {
+                            <span style="color: red;">None of the projects are completed yet.</span>
+                        }
+                    </li>
+                    <li>
+                        <strong>In Progress:</strong> @Model.InProgressProjects
+                    </li>
+                    <li>
+                        <strong>In Waiting:</strong> @Model.InWaitingProjects
+                        @if (Model.InWaitingProjects > Model.ProjectCount / 2)
+                        {
+                            <span style="color: orange;"> More than half the projects are incomplete.</span>
+                        }
+                    </li>
+                    <li>
+                        <strong>Total Budget Spent:</strong> R @Model.TotalBudget
+                    </li>
+                    <li>
+                        <strong>Project Completion Rate:</strong>
+                        @{
+                            var completionRatePro = Model.ProjectCount > 0
+                            ? (int)((double)Model.CompleteProjects / Model.ProjectCount * 100)
+                            : 0;
+                        }
+                        @completionRatePro%
+                        @if (completionRatePro < 50)
+                        {
+                            <span style="color: red;">Project completion is below 50%.</span>
+                        }
+                        else if (completionRatePro >= 80)
+                        {
+                            <span style="color: green;">Great progress!</span>
+                        }
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+
+        <div style="margin-top: 20px;">
+            <center><h2>All Task Insights</h2></center>
+            <div style="background-color: #f9f9f9; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>
+                        <strong>Total Tasks:</strong> @Model.TotalTasks
+                    </li>
+                    <li>
+                        <strong>Completed Tasks:</strong> @Model.CompleteTasks
+                    </li>
+                    <li>
+                        <strong>In Progress Tasks:</strong> @Model.InProgressTasks
+                    </li>
+                    <li>
+                        <strong>In Waiting Tasks:</strong> @Model.InWaitingTasks
+                        @if (Model.InWaitingTasks > Model.TotalTasks * 0.4)
+                        {
+                            <span style="color: red;">A high number of tasks remain incomplete.</span>
+                        }
+                    </li>
+                    <li>
+                        <strong>Task Completion Rate:</strong>
+                        @{
+                            var completionRate = Model.TotalTasks > 0
+                            ? (int)((double)Model.CompleteTasks / Model.TotalTasks * 100)
+                            : 0;
+                        }
+                        @completionRate%
+                        @if (completionRate < 50)
+                        {
+                            <span style="color: red;">Task completion is below 50%.</span>
+                        }
+                        else if (completionRate >= 80)
+                        {
+                            <span style="color: green;">Great progress!</span>
+                        }
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        @{
+            var projectCompletionRate = Model.ProjectCount > 0
+            ? (int)((double)Model.CompleteProjects / Model.ProjectCount * 100)
+            : 0;
+        }
+
+
+
+        <div style="margin-top: 20px;">
+            <label>Project Completion Progress</label>
+            <div style="background-color: #eee; border-radius: 20px; height: 20px; width: 100%;">
+                @if (projectCompletionRate < 25)
+                        {
+                    <div style="width: @projectCompletionRate%; background-color: red; height: 100%; border-radius: 20px;"></div>
+                }else if(projectCompletionRate > 25 & projectCompletionRate<50){
+                     <div style="width: @projectCompletionRate%; background-color: orange; height: 100%; border-radius: 20px;"></div>
+                }else if(projectCompletionRate > 50){
+                
+                    <div style="width: @projectCompletionRate%; background-color: green; height: 100%; border-radius: 20px;"></div>
+                }
+            </div>
+        </div>
+
+
+        <div style="margin-top: 20px;">
+            <label>Task Completion Progress</label>
+            <div style="background-color: #eee; border-radius: 20px; height: 20px; width: 100%;">
+                <div style="width: @completionRate%; background-color: red; height: 100%; border-radius: 20px;"></div>
+            </div>
+        </div>
+
+
+
+        <script>
+            const projectCtx = document.getElementById('projectChart').getContext('2d');
+            const taskCtx = document.getElementById('taskChart').getContext('2d');
+
+            const projectChart = new Chart(projectCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Not Started'],
+                    datasets: [{
+                        label: 'Project Stats',
+                        data: [
+                            @Model.CompleteProjects,
+                            @Model.InProgressProjects,
+                            @Model.InWaitingProjects
+                        ],
+                        backgroundColor: ['#2ecc71', '#f1c40f', '#e74c3c'],
+                        borderColor: '#333',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+
+            const taskChart = new Chart(taskCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Not Started'],
+                    datasets: [{
+                        label: 'Task Stats',
+                        data: [
+                            @Model.CompleteTasks,
+                            @Model.InProgressTasks,
+                            @Model.InWaitingTasks
+                        ],
+                        backgroundColor: ['#1abc9c', '#e67e22', '#95a5a6'],
+                        borderColor: '#333',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+
+        </script>
+
+
+
+
+       
+    </div>
+</div>

@@ -1,0 +1,378 @@
+﻿@model List<WebSpaceApp.Models.TaskDocument>
+@{
+    ViewData["Title"] = "DocumentView";
+    var updates = ViewBag.Updates as List<WebSpaceApp.Models.DocumentUpdate>;
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Task Documents & Updates</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+       
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f7f9;
+            display: flex; 
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: whitesmoke;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+            .sidebar .logo {
+                font-size: 24px;
+                font-weight: bold;
+                color: #ffc107;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+
+            .sidebar nav ul {
+                list-style: none;
+                padding: 0;
+            }
+
+                .sidebar nav ul li a {
+                    color: #007bff;
+                    text-decoration: none;
+                    display: block;
+                    padding: 12px 15px;
+                    border-radius: 4px;
+                    transition: background-color 0.3s, color 0.3s;
+                }
+
+                    .sidebar nav ul li.active,
+                    .sidebar nav ul li a:hover {
+                        background-color: #555;
+                        color: #212529;
+                    }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            background-color: #ffffff;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+            .header h1 {
+                margin: 0;
+                font-size: 28px;
+                color: #333;
+            }
+
+        .document-container, .updates-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+            .document-item:last-child {
+                border-bottom: none;
+            }
+
+        .document-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .document-title-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .document-icon {
+            font-size: 24px;
+            color: #6c757d;
+        }
+
+        .document-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .document-meta {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .document-actions a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+            .document-actions a:hover {
+                color: #0056b3;
+            }
+
+        
+        .updates-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .update-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+        }
+
+        .update-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+        }
+
+        .update-author-date {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .update-author {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .update-date {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .update-content {
+            margin-bottom: 15px;
+            padding-left: 15px;
+        }
+
+        .update-label {
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .update-text {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .reply-button {
+            background-color: transparent;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+            .reply-button:hover {
+                color: #0056b3;
+            }
+
+        .reply-box {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
+        }
+
+            .reply-box textarea {
+                width: 100%;
+                height: 60px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+                resize: vertical;
+            }
+
+            .reply-box button {
+                background-color: #28a745;
+                color: white;
+                padding: 8px 12px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                float: right;
+                margin-top: 10px;
+            }
+
+                .reply-box button:hover {
+                    background-color: #218838;
+                }
+
+        .comment-box {
+            margin-top: 20px;
+        }
+
+            .comment-box textarea {
+                width: 100%;
+                height: 80px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+                resize: vertical;
+            }
+
+            .comment-box button {
+                background-color: #28a745;
+                color: white;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                float: right;
+                margin-top: 10px;
+            }
+
+                .comment-box button:hover {
+                    background-color: #218838;
+                }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">Updates</div>
+        <nav>
+            <ul>
+                <li >
+                    <a href="@Url.Action("ViewTask", "Task")">View  Task</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("CreateTask", "Task")">Create Task</a>
+                </li>
+                <li class="active">
+                    <a href="@Url.Action("DocumentView", "Document")">Updates</a>
+                </li>
+
+                <li>
+                    <a href="@Url.Action("TaskReport", "Task")">Reports</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Logout", "Account")">Log out</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Task  Updates</h1>
+        </div>
+
+        <div class="document-container">
+            <h2 class="section-title">Available Documents</h2>
+            <div class="document-list">
+                @foreach (var doc in Model)
+                {
+                    <div class="document-item">
+                        <div class="document-info">
+                            <div class="document-title-meta">
+                                <i class="fas fa-file-@doc.FileType document-icon"></i>
+                                <span class="document-name">@doc.Title</span>
+                            </div>
+                            <span class="document-meta">Associated with: @doc.TaskName</span>
+                        </div>
+                        <div class="document-actions">
+                            <a href="#">Download</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="updates-container">
+            <h2 class="section-title">Updates Feed</h2>
+            <div class="updates-list">
+                @foreach (var update in updates)
+                {
+                    <div class="update-card">
+                        <div class="update-header">
+                            <div class="update-author-date">
+                                <span class="update-author">@update.Author</span>
+                                <span class="update-date">@update.Date.ToString("MMMM d, yyyy")</span>
+                            </div>
+                        </div>
+                        <div class="update-content">
+                            <div class="update-text">
+                                <span class="update-label">Update:</span>
+                                @update.DocumentTitle has been updated.
+                            </div>
+                            <div class="update-text">
+                                <span class="update-label">Comment:</span>
+                                "@update.Comment"
+                            </div>
+                        </div>
+                        <div class="update-actions">
+                            <button class="reply-button">Reply</button>
+                        </div>
+                        <div class="reply-box" style="display: none;">
+                            <textarea placeholder="Reply to @update.Author's update..."></textarea>
+                            <button>Post Reply</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.reply-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const replyBox = button.closest('.update-card').querySelector('.reply-box');
+                replyBox.style.display = replyBox.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+    </script>
+</body>
+</html>

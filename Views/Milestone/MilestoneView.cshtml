@@ -1,0 +1,132 @@
+﻿@model List<WebSpaceApp.Models.MilestoneViewModel>
+
+@{
+    ViewData["Title"] = "All Milestones";
+}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f8;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .card {
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-left: 5px solid #0078D7;
+        border-radius: 6px;
+        padding: 15px 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #0078D7;
+        }
+
+        .card p {
+            margin: 8px 0;
+            color: #555;
+        }
+
+            .card p strong {
+                color: #333;
+            }
+
+        .card.delayed {
+            border-left-color: #d9534f;
+            background-color: #fff5f5;
+        }
+
+        .card.completed {
+            border-left-color: #28a745;
+            background-color: #f4fff4;
+        }
+
+        .card.in-progress {
+            border-left-color: #f0ad4e;
+            background-color: #fffdf4;
+        }
+
+        .card .reason {
+            color: #d9534f;
+            font-style: italic;
+        }
+
+            .card .reason.on-time {
+                color: #28a745;
+                font-style: italic;
+            }
+
+    .update-btn {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 8px 12px;
+        background-color: #0078D7;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+    }
+
+        .update-btn:hover {
+            background-color: #005fa3;
+        }
+</style>
+
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
+    <div class="card-grid">
+        @foreach (var milestone in Model)
+        {
+            var statusClass = milestone.Status switch
+            {
+                "Completed" => "completed",
+                "In Progress" => "in-progress",
+                "Delayed" => "delayed",
+                _ => "" // "Not Started" or any other status
+            };
+
+            <div class="card @(statusClass)">
+                <h3>@milestone.MilestoneName</h3>
+                <p><strong>Description:</strong> @milestone.Description</p>
+                <p><strong>Due Date:</strong> @milestone.DueDate.ToString("yyyy-MM-dd")</p>
+                <p><strong>Status:</strong> @milestone.Status</p>
+                <p><strong>Reason:</strong> @milestone.Reason</p>
+
+                @if (ViewBag.UserRole == "Foremen")
+                {
+                    <a href="@Url.Action("UpdateMilestone", "Milestone", new { Id = milestone.Id })" class="update-btn">Update</a>
+                }
+            </div>
+        }
+    </div>
+</div>

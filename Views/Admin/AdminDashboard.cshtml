@@ -1,0 +1,250 @@
+﻿
+
+@model IEnumerable<WebSpaceApp.Models.UserViewModel>
+
+@{
+    ViewData["Title"] = "AdminDashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+    .sidebar {
+        width: 220px;
+        background-color: whitesmoke;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+    }
+
+        .sidebar .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: black;
+        }
+        .sidebar .nav-list li:hover,
+        .sidebar .nav-list li.active {
+            background-color: #ff8c00;
+            color: #212529;
+            font-weight: bold;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #ffffff;
+        overflow-y: auto;
+        }
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 20px;
+        }
+        .logo h2 {
+            color: #FFEB3B; 
+        }
+        .menu-section {
+            margin-bottom: 30px;
+        }
+        .menu-title {
+            padding: 0 20px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #FFEB3B; 
+            margin-bottom: 10px;
+        }
+        .menu-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: #e0e0e0;
+        }
+        .menu-item:hover {
+            background-color: #333;
+            color: #ffffff;
+        }
+        .menu-item.active {
+            background-color: #333;
+            color: #FFEB3B; 
+            border-left: 3px solid #FFEB3B;
+        }
+        .integration-section {
+            background-color: #fffde7; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        .integration-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: #FFEB3B; 
+        }
+        .integration-content {
+            padding: 15px 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background-color: #333;
+            color: #FFEB3B; 
+        }
+        .btn-primary:hover {
+            background-color: #000;
+        }
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid #333;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background-color: #f5f5f5;
+        }
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .project-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            border: 1px solid #eee;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .project-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .project-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+        .project-meta {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+        .project-description {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+        }
+        .btn-create {
+            background-color: #333;
+            color: #FFEB3B; 
+            padding: 10px 20px;
+        }
+        .btn-create:hover {
+            background-color: #000;
+        }
+    </style>
+
+<div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        
+            <div class="logo">Main Menu</div>
+        
+
+        <div class="menu-section">
+      
+            <div class="menu-item"><a href="@Url.Action("Register", "Account")">Register User</a></div>
+            <div class="menu-item"><a href="@Url.Action("ProjectView", "Task")">View Tasks</a></div>
+            <div class="menu-item"><a href="@Url.Action("TaskView", "Task")">View Tasks</a></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Users in the System</h1>
+            @* <button class="btn btn-create">Add User</button> *@
+        </div>
+
+        <div class="projects-grid">
+            @foreach (var user in Model)
+            {
+                <div class="project-card">
+                    <div class="project-title">@user.UserName @user.UserSurname</div>
+                    <div class="project-meta">
+                        Email: @user.Email |
+                        Address: @user.Address
+                    </div>
+                    <div class="project-description">
+                        Role: @user.Role
+                    </div>
+                    <div class="action-buttons">
+                        <form asp-action="AdminDashboard" asp-controller="Admin" method="post">
+                            <input type="hidden" name="UserId" value="@user.UserId" />
+                            <select name="NewRole" class="btn btn-primary">
+                                <option value="">Assign New Role</option>
+                                <option value="P">Project Manager</option>
+                                <option value="F">Foremen</option>
+                                <option value="C">Client</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Assign Role</button>
+                        </form>
+
+                        <form asp-action="DeleteUser" asp-controller="Admin" method="post">
+                            <input type="hidden" name="UserId" value="@user.UserId" />
+                            <button type="submit" class="btn btn-secondary">Delete User</button>
+                            @* <a class="btn btn-primary" href="@Url.Action("UpdateUser", "Account", new { user = user.UserId })">Update User</a> *@
+                        </form>
+                       
+                           
+                          
+                       
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

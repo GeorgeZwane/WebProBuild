@@ -1,0 +1,296 @@
+﻿@model IEnumerable<WebSpaceApp.Models.CreateProjectViewModel>
+
+@{
+    ViewData["Title"] = "Project Manager - My Projects";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fafafa;
+        color: #333;
+    }
+
+    .pm-container {
+        display: flex;
+        height: 100vh;
+        overflow-y: auto;
+    }
+
+    .pm-sidebar {
+        width: 220px;
+        background-color: whitesmoke;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+    }
+
+        .pm-sidebar .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: black;
+        }
+
+        .pm-sidebar .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+            .pm-sidebar .nav-list li {
+                padding: 12px 10px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+                .pm-sidebar .nav-list li:hover,
+                .pm-sidebar .nav-list li.active {
+                    background-color: darkorange;
+                    color: #212529;
+                    font-weight: bold;
+                }
+
+    .pm-main-content {
+        flex: 1;
+        padding: 20px;
+        background-color: #ffffff;
+        overflow-y: auto;
+    }
+
+    .pm-projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .pm-project-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 20px;
+        border: 1px solid #eee;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+        .pm-project-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+    .pm-project-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .pm-project-meta {
+        color: #666;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+
+    .pm-action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .pm-btn {
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .pm-btn-primary {
+        background-color: #333;
+        color: #FFEB3B;
+    }
+
+        .pm-btn-primary:hover {
+            background-color: #000;
+        }
+
+    .pm-btn-secondary {
+        background-color: transparent;
+        border: 1px solid #333;
+        color: #333;
+    }
+
+        .pm-btn-secondary:hover {
+            background-color: #f5f5f5;
+        }
+
+    .pm-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .pm-page-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+    }
+
+   
+    .pm-progress-container {
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .pm-progress-label {
+        font-size: 14px;
+        color: #555;
+        font-weight: 500;
+        min-width: 60px;
+    }
+
+    .pm-progress-bar-wrapper {
+        flex: 0 0 50%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .pm-progress-bar-container {
+        flex: 1;
+        height: 12px;
+        background-color: #e9ecef;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+    .pm-progress-bar {
+        height: 100%;
+        border-radius: 6px;
+        transition: width 0.6s ease-in-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .pm-progress-bar.low-progress {
+            background: linear-gradient(90deg, #dc3545 0%, #e74c3c 100%);
+        }
+
+        .pm-progress-bar.medium-progress {
+            background: linear-gradient(90deg, #ffc107 0%, #f39c12 100%);
+        }
+
+        .pm-progress-bar.high-progress {
+            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+        }
+
+        .pm-progress-bar.complete {
+            background: linear-gradient(90deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
+        }
+
+    .pm-progress-percentage {
+        font-weight: 600;
+        color: #333;
+        font-size: 12px;
+        min-width: 35px;
+        text-align: right;
+    }
+
+    .pm-progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-image: linear-gradient( -45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent );
+        background-size: 20px 20px;
+        animation: pm-progress-stripes 2s linear infinite;
+    }
+
+    @@keyframes pm-progress-stripes {
+        0% {
+            background-position: 0 0;
+        }
+
+        100% {
+            background-position: 20px 0;
+        }
+    }
+
+    .pm-location-info {
+        color: #666;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+</style>
+
+<div class="pm-container">
+    <!-- No sidebar for Project Manager view -->
+    <!-- Main Content -->
+    <div class="pm-main-content">
+        <div class="pm-page-header">
+            <h1 class="pm-page-title">My Projects</h1>
+        </div>
+
+        <div class="project-banner">
+            
+            <div class="pm-projects-grid">
+                @foreach (var project in Model)
+                {
+                    <div class="pm-project-card">
+                        <div class="pm-project-title">@project.Name</div>
+                        <div class="pm-project-meta">
+                            Created: @project.Startdate.ToString("MMMM dd, yyyy") |
+                            Deadline: @project.Enddate.ToString("MMMM dd, yyyy")
+                        </div>
+
+                        <div class="pm-progress-container">
+                            <span class="pm-progress-label">Progress:</span>
+                            <div class="pm-progress-bar-wrapper">
+                                <div class="pm-progress-bar-container">
+                                    <div class="pm-progress-bar @(
+                                         (project.Progress ?? 0) >= 100 ? "complete" :
+                                         (project.Progress ?? 0) >= 75 ? "high-progress" :
+                                         (project.Progress ?? 0) >= 50 ? "medium-progress" :
+                                         "low-progress"
+                                                                        )" style="width: @(project.Progress ?? 0) % "></div>
+                            </div>
+                            <span class="pm-progress-percentage">@(project.Progress ?? 0)%</span>
+                        </div>
+                    </div>
+
+                        <div class="pm-location-info">
+                            Location: @project.Location
+                        </div>
+
+                        <div class="pm-action-buttons">
+                            <a class="pm-btn pm-btn-primary" href="@Url.Action("ViewTask", "Task", new { projectId = project.Id })">View Task</a>
+                            <a class="pm-btn pm-btn-primary" href="@Url.Action("Dashboard", "Project", new { projectId = project.Id })">View Project</a>
+                        </div>
+                    </div>
+                                }
+            </div>
+        </div>
+    </div>
+</div>

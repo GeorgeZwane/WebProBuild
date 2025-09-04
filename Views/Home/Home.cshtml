@@ -1,0 +1,530 @@
+﻿@model IEnumerable<WebSpaceApp.Models.ViewTaskModel>
+@{
+    ViewBag.Title = "Dashboard | ProBuild.com";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var projectId = Context.Session.GetString("ProjectId");
+}
+
+<style>
+    :root {
+        --black: #1a1a1a;
+        --white: #ffffff;
+        --primary: #FF6B00;
+        --primary-bg: #fff4e6;
+        --gray: #e0e0e0;
+        --dark-gray: #666;
+    }
+
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fafafa;
+        color: #333;
+    }
+
+    .main-content {
+        padding: 30px;
+        background-color: var(--white);
+    }
+
+    .welcome-section {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .welcome-message {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--black);
+        margin-bottom: 10px;
+    }
+
+    .date-display {
+        color: var(--dark-gray);
+        font-size: 14px;
+    }
+
+   
+    .calendar-section {
+        margin-bottom: 40px;
+        width: 90%;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .calendar-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--black);
+        margin: 0;
+    }
+
+    .calendar-nav {
+        display: flex;
+        gap: 10px;
+    }
+
+    .calendar-nav-btn {
+        background-color: var(--black);
+        color: var(--primary);
+        border: none;
+        border-radius: 4px;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .calendar {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+        .calendar th {
+            background-color: var(--black);
+            color: var(--primary);
+            padding: 10px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .calendar td {
+            border: 1px solid #eee;
+            height: 100px;
+            vertical-align: top;
+            padding: 8px;
+            font-size: 14px;
+            width: 14.28%;
+        }
+
+    .calendar-day {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .today {
+        background-color: var(--primary-bg);
+        position: relative;
+    }
+
+        .today::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary);
+            border-radius: 50%;
+        }
+
+    .calendar-event {
+        background-color: #e3f2fd;
+        border-radius: 3px;
+        padding: 2px 5px;
+        margin-bottom: 3px;
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .tasks-section {
+        margin-top: 30px;
+        width: 90%;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .tasks-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .tasks-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--black);
+        margin: 0;
+    }
+
+    .view-all {
+        color: var(--black);
+        text-decoration: none;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .task-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .task-card {
+        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.2s;
+        border-left: 4px solid var(--primary);
+    }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+    .task-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+
+    .task-project {
+        font-size: 12px;
+        color: var(--dark-gray);
+        margin-bottom: 5px;
+    }
+
+    .task-name {
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .task-due {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: var(--dark-gray);
+        margin-bottom: 10px;
+    }
+
+    .task-priority {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+
+    .priority-high {
+        background-color: #f44336;
+    }
+
+    .priority-medium {
+        background-color: #ff9800;
+    }
+
+    .priority-low {
+        background-color: #4caf50;
+    }
+
+    .task-status {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .status-waiting {
+        background-color: #fff3e0;
+        color: #e65100;
+    }
+
+    .status-in-progress {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+    }
+
+    .status-completed {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .task-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .task-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+        border-radius: 3px;
+        border: none;
+        background-color: #f5f5f5;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .task-btn:hover {
+            background-color: #e0e0e0;
+        }
+</style>
+
+<section class="main-content">
+    <div class="welcome-section">
+        @{
+            var userName = Context.Session.GetString("UserName") ?? "Guest";
+        }
+
+        <h1 class="welcome-message">
+            Welcome, @userName!
+        </h1>
+        <div class="date-display" id="current-date"></div>
+    </div>
+
+    <div class="calendar-section">
+        <div class="calendar-header">
+            <h2 class="calendar-title">Check the calender for task deadlines</h2>
+            <div class="calendar-nav">
+                <button class="calendar-nav-btn">Today</button>
+                <button class="calendar-nav-btn">&lt;</button>
+                <button class="calendar-nav-btn">&gt;</button>
+            </div>
+        </div>
+
+        <table class="calendar">
+            <thead>
+                <tr>
+                    <th>Sun</th>
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thu</th>
+                    <th>Fri</th>
+                    <th>Sat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>7</td>
+                    <td>8</td>
+                    <td>9</td>
+                    <td>10</td>
+                    <td>11</td>
+                    <td>12</td>
+                </tr>
+                <tr>
+                    <td>13</td>
+                    <td>14</td>
+                    <td>15</td>
+                    <td>16</td>
+                    <td>17</td>
+                    <td>18</td>
+                    <td class="today">19</td>
+                </tr>
+                <tr>
+                    <td>20</td>
+                    <td>21</td>
+                    <td>22</td>
+                    <td>23</td>
+                    <td>24</td>
+                    <td>25</td>
+                    <td>26</td>
+                </tr>
+                <tr>
+                    <td>27</td>
+                    <td>28</td>
+                    <td>29</td>
+                    <td>30</td>
+                    <td>31</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tasks-section">
+        <div class="tasks-header">
+            <h2 class="tasks-title">Your Construction Tasks</h2>
+            <a href="@Url.Action("ViewTask", "Task")" class="view-all">
+                View all tasks
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+
+      @*   <div class="task-list">
+            <div class="task-card">
+                <div class="task-card-header">
+                    <div>
+                        <div class="task-project">Downtown Office Tower</div>
+                        <h3 class="task-name">Review foundation plans</h3>
+                    </div>
+                    <span class="task-status status-waiting">Waiting</span>
+                </div>
+                <div class="task-due">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Due Jul 25, 2025</span>
+                </div>
+                <div>
+                    <span class="task-priority priority-high"></span>
+                    <span>High Priority</span>
+                </div>
+                <div class="task-actions">
+                    <button class="task-btn" data-action="view">View</button>
+                    <button class="task-btn" data-action="complete">Complete</button>
+                </div>
+            </div>
+
+            <div class="task-card">
+                <div class="task-card-header">
+                    <div>
+                        <div class="task-project">Riverside Condos</div>
+                        <h3 class="task-name">Approve steel delivery</h3>
+                    </div>
+                    <span class="task-status status-in-progress">In Progress</span>
+                </div>
+                <div class="task-due">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Due Aug 10, 2025</span>
+                </div>
+                <div>
+                    <span class="task-priority priority-high"></span>
+                    <span>High Priority</span>
+                </div>
+                <div class="task-actions">
+                    <button class="task-btn" data-action="view">View</button>
+                    <button class="task-btn" data-action="complete">Complete</button>
+                </div>
+            </div>
+
+            <div class="task-card">
+                <div class="task-card-header">
+                    <div>
+                        <div class="task-project">Main Street Renovation</div>
+                        <h3 class="task-name">Schedule safety inspection</h3>
+                    </div>
+                    <span class="task-status status-waiting">Waiting</span>
+                </div>
+                <div class="task-due">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Due Jul 28, 2025</span>
+                </div>
+                <div>
+                    <span class="task-priority priority-medium"></span>
+                    <span>Medium Priority</span>
+                </div>
+                <div class="task-actions">
+                    <button class="task-btn" data-action="view">View</button>
+                    <button class="task-btn" data-action="start">Start</button>
+                </div>
+            </div> *@
+
+        <div class="projects-grid">
+            @foreach (var task in Model)
+            {
+                <div class="project-card">
+                    <div class="project-title">@task.Description</div>
+                    <div class="project-meta">
+                        Created: @task.StartDate.ToString("MMMM dd, yyyy") |
+                        Deadline: @task.EndDate.ToString("MMMM dd, yyyy")
+                    </div>
+                    <div class="project-description">
+                        Progress: @task.Progress
+                    </div>
+                    <div class="action-buttons">
+                        @*  <a href="@Url.Action("ViewTask", "Task", new { id = task.Id })" class="btn btn-primary">View Tasks</a>
+                        <a href="@Url.Action("DocumentView", "Document"/* , new { id = task.Id } */)" class="btn btn-secondary">Updates</a> *@
+                        <a href="@Url.Action("AddMilestone", "Milestone", new { id = task.Id })" class="btn btn-primary">Add Milestones</a>
+                        <a href="#assignForemanModal" class="btn btn-primary" data-toggle="modal" data-target="assignForemanModal" data-task-id="@task.Id">
+                            Assign User to Task
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Setting the current date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            $('#current-date').text(new Date().toLocaleDateString('en-US', options));
+
+            // Calendar navigation 
+            $('.calendar-nav-btn').click(function () {
+                console.log('Calendar navigation: ' + $(this).text());
+            });
+
+            // Task actions
+            $('.task-btn').click(function () {
+                const action = $(this).data('action');
+                const taskName = $(this).closest('.task-card').find('.task-name').text();
+                console.log(`${action} clicked for task: ${taskName}`);
+                if (action === 'complete') {
+                    $(this).closest('.task-card').find('.task-status')
+                        .removeClass('status-waiting status-in-progress')
+                        .addClass('status-completed')
+                        .text('Completed');
+                   
+                    $.post('@Url.Action("UpdateTaskStatus", "Task")', { taskName: taskName, status: 'Completed' });
+                } else if (action === 'start') {
+                    $(this).closest('.task-card').find('.task-status')
+                        .removeClass('status-waiting status-completed')
+                        .addClass('status-in-progress')
+                        .text('In Progress');
+                    
+                     $.post('@Url.Action("UpdateTaskStatus", "Task")', { taskName: taskName, status: 'InProgress' });
+                } else if (action === 'view') {
+                    // Redirect to task details
+                    window.location.href = '@Url.Action("Details", "Task")/' + taskName;
+                }
+            });
+        });
+    </script>
+}

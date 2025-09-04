@@ -1,0 +1,43 @@
+﻿@model WebSpaceApp.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<section class="contact_section layout_padding">
+    <div class="contact_bg_box">
+        <div class="img-box">
+            <img src="~/images/image1.jpg" alt="Registration Banner" />
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="heading_container heading_center">
+            <h2>REGISTER</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-md-7 mx-auto">
+                @using (Html.BeginForm("Register", "Account", FormMethod.Post))
+                {
+                    <div class="contact_form-container">
+                        <div>
+                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "Name" })
+                            @Html.TextBoxFor(m => m.Surname, new { @class = "form-control", placeholder = "Surname" })
+                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Email", type = "email" })
+                            @Html.TextBoxFor(m => m.Address, new { @class = "form-control", placeholder = "Address" })
+                            @Html.TextBoxFor(m => m.ContactNumber, new { @class = "form-control", placeholder = "Contact Number" })
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Password" })
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Confirm Password" })
+                            @Html.TextBoxFor(m => m.Role, new { @class = "form-control", placeholder = "Role" })
+
+                            <div class="btn-box">
+                                <button type="submit" class="btn btn-primary">REGISTER</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

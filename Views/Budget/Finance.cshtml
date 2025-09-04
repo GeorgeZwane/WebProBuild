@@ -1,0 +1,244 @@
+﻿
+@model WebSpaceApp.Models.BudgetEntryModel
+
+@{
+    ViewData["Title"] = "Finance";
+}
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #f1f1f1;
+    }
+
+    .container {
+        display: flex;
+        height: 100vh;
+    }
+
+    .sidebar {
+        width: 220px;
+        background-color: whitesmoke;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+    }
+
+        .sidebar .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #ffc107;
+        }
+
+        .sidebar .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+            .sidebar .nav-list li {
+                padding: 12px 10px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+                .sidebar .nav-list li:hover,
+                .sidebar .nav-list li.active {
+                    background-color: #ffc107;
+                    color: #212529;
+                    font-weight: bold;
+                }
+
+    .main-content {
+        flex: 1;
+        padding: 20px 40px;
+        overflow-y: auto;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+        .header input[type="text"] {
+            padding: 8px 12px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+    .header-icons span {
+        margin-left: 20px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .recent-activity h2 {
+        margin-bottom: 20px;
+        color: #212529;
+    }
+
+    .activity-cards {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+        .activity-cards .card {
+            background-color: #fff;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            flex: 1 1 150px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+            .activity-cards .card span {
+                display: block;
+                font-size: 28px;
+                font-weight: bold;
+                color: #212529;
+            }
+
+            .activity-cards .card p {
+                margin: 10px 0 0 0;
+                color: #555;
+            }
+
+    .view-more {
+        background-color: #212529;
+        color: #fff;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .dashboard-row {
+        display: flex;
+        gap: 40px;
+        margin-top: 40px;
+        flex-wrap: wrap;
+    }
+
+    .material-usage,
+    .top-materials {
+        background-color: #fff;
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        padding: 20px;
+        flex: 1 1 300px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+        .material-usage h2,
+        .top-materials h2 {
+            margin-bottom: 20px;
+            color: #212529;
+        }
+
+    .chart {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .bar {
+        height: 25px;
+        background-color: #ccc;
+        border-radius: 4px;
+        text-align: center;
+        line-height: 25px;
+        color: #212529;
+        font-weight: bold;
+    }
+
+        .bar.order {
+            background-color: #007bff;
+        }
+
+        .bar.delivered {
+            background-color: #28a745;
+        }
+
+        .bar.used {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .bar.wasted {
+            background-color: #dc3545;
+        }
+
+    .material-cards {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .material-card {
+        background-color: #f8f9fa;
+        border: 1px solid #ccc;
+        font-size: 32px;
+        padding: 20px;
+        border-radius: 6px;
+    }
+
+    .view-all {
+        margin-top: 20px;
+        background-color: #212529;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+</style>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="logo">Budget</div>
+        <ul class="nav-list">
+            <li class="active">
+                <a href="@Url.Action("BudgetEntry", "Budget")">Budget Overview</a>
+            </li>
+            <li>
+                <a href="@Url.Action("BudgetList", "Budget")">Budget List</a>
+            </li>
+            <li>
+                <a href="@Url.Action("BudgetEntry", "Budget")">Add Budget</a>
+            </li>
+            <li>
+                <a href="@Url.Action("MaterialInventory", "MaterialInventory")">Cost Tracking</a>
+            </li>
+            <li>
+                <a href="@Url.Action("AddMaterials", "MaterialInventory")">Reports </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Logout", "Account")">Log out</a>
+            </li>
+        </ul>
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Projects View</h1>
+        </div>
+
+        <div class="project-banner"> 
+
+        </div>
+    </div>
+</div>
+

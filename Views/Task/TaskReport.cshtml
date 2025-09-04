@@ -1,0 +1,303 @@
+﻿@model WebSpaceApp.Models.TaskReportViewModel
+@{
+    ViewData["Title"] = "Task Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  
+    .main-content {
+        background-color: white;
+        padding: 20px;
+        flex-grow: 1; 
+        overflow-y: auto; 
+    }
+
+    .container {
+        display: flex;
+        height: 100vh;
+    }
+
+
+    .sidebar {
+        width: 220px;
+        background-color: whitesmoke;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+    }
+
+        .sidebar .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: black; 
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+            .sidebar .nav-list li {
+                margin-bottom: 15px;
+            }
+
+            .sidebar .nav-list a {
+                text-decoration: none;
+                color: black; 
+                display: block;
+                padding: 12px 15px;
+                border-radius: 4px;
+                transition: background-color 0.3s, color 0.3s;
+            }
+
+                
+                .sidebar .nav-list a:hover,
+                .sidebar .nav-list a.active {
+                    background-color: #ff8c00;
+                    color: #000;
+                    font-weight: bold;
+                }
+
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .header h2 {
+            margin: 0;
+        }
+
+    .filter-controls {
+        display: flex;
+        gap: 10px;
+    }
+
+        .filter-controls select,
+        .filter-controls button {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .filter-controls button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+    .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .metric-card {
+        background-color: #f8f9fa; 
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+        .metric-card.overdue {
+            border: 2px solid #dc3545;
+        }
+
+        .metric-card h3 {
+            margin: 0;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .metric-card p {
+            margin: 10px 0 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .metric-card span {
+            color: green;
+            font-size: 14px;
+        }
+
+    .chart-section, .recent-section {
+        background-color: white; 
+        border-radius: 8px;
+        margin-top: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+        .chart-section h3, .recent-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 300px;
+        margin: 0 auto;
+        display: flex;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="logo">Main Menu</div>
+        <ul class="nav-list">
+            <li class="active">
+                <a href="@Url.Action("ViewTask", "Task")">View  Task</a>
+            </li> 
+
+            <li>
+                <a href="@Url.Action("CreateTask", "Task")">Create Task</a>
+            </li> 
+            <li>
+                <a href="@Url.Action("CreateTask", "Task")">Updates</a>
+            </li>
+            <li>
+                <a href="@Url.Action("TaskReport", "Task")">Reports</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Logout", "Account")">Log out</a>
+            </li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <h2>Task Reports</h2>
+            <div class="filter-controls">
+             @*    <select>
+                    <option>All Projects</option>
+                    <option>Project Alpha</option>
+                    <option>Project Beta</option>
+                </select>
+                <select>
+                    <option>This Month</option>
+                    <option>This Quarter</option>
+                    <option>This Year</option>
+                </select>
+                <button>Export to PDF</button> *@
+            </div>
+        </div>
+
+
+        <div class="metrics">
+            <div class="metric-card">
+                <h3>Total Tasks</h3>
+                <p>@Model.TotalTasks</p>
+            </div>
+            <div class="metric-card">
+                <h3>Incomplete Tasks</h3>
+                <p>@Model.IncompleteTasks</p>
+            </div>
+            <div class="metric-card">
+                <h3>InProgress Tasks</h3>
+                <p>@Model.InProgressTasks</p>
+            </div>
+            <div class="metric-card">
+                <h3>Complete Tasks</h3>
+                <p>@Model.CompleteTasks</p>
+            </div>
+
+        </div>
+        <br />
+        <!-- Chart.js CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Task Chart -->
+        <div style="text-align: center;">
+            <h2>Task Metrics</h2>
+            <canvas id="taskChart" width="200" height="200"></canvas>
+        </div>
+
+        <div class="recent-section">
+            <h3>Overdue Tasks</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task Name</th>
+                        <th>Assigned To</th>
+                        <th>Due Date</th>
+                        <th>Overdue By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in Model.OverdueTasks)
+                    {
+                        <tr>
+                            <td>@task.TaskName</td>
+                            <td>@task.AssignedTo</td>
+                            <td>@task.DueDate.ToString("yyyy-MM-dd")</td>
+                            <td>@task.OverdueBy</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+   
+    const taskCtx = document.getElementById('taskChart').getContext('2d');
+
+
+
+       const taskChart = new Chart(taskCtx, {
+        type: 'doughnut',  // <-- Corrected from 'donut'
+        data: {
+            labels: ['Complete', 'In Progress', 'Incomplete'],
+            datasets: [{
+                label: 'Task Stats',
+                data: [
+                    @Model.CompleteTasks,
+                    @Model.InProgressTasks,
+                    @Model.IncompleteTasks
+                ],
+                backgroundColor: ['#1abc9c', '#e67e22', '#95a5a6'],
+                borderColor: '#333',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '40%',  // adjust hole size for doughnut
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+
+</script>
