@@ -1,0 +1,145 @@
+﻿@model List<LeaderboardViewModel>
+
+<style>
+    /* Typography */
+    h1, h2, h3 {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        letter-spacing: 1px;
+    }
+
+    /* Animation */
+    keyframes fadeSlideIn {
+        0%
+
+    {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .animated-heading {
+        animation: fadeSlideIn 1s ease-out forwards;
+    }
+
+    /* Layout container */
+    .layout {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 220px;
+        background-color: whitesmoke;
+        padding: 20px;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+        .sidebar .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: black;
+        }
+
+        .sidebar .nav-list {
+            list-style: none;
+            padding: 0;
+        }
+
+            .sidebar .nav-list li {
+                margin-bottom: 12px;
+            }
+
+            .sidebar .nav-list a {
+                display: block;
+                text-decoration: none;
+                color: #333;
+                padding: 10px 14px;
+                border-radius: 4px;
+                transition: background 0.2s, color 0.2s;
+            }
+
+                .sidebar .nav-list a:hover,
+                .sidebar .nav-list a.active {
+                    background-color: #ff8c00;
+                    color: #fff;
+                    font-weight: bold;
+                }
+
+    /* Main content */
+    .main-content {
+        flex: 1;
+        padding: 30px;
+    }
+
+    /* Table styling */
+    .table th, .table td {
+        vertical-align: middle;
+        font-size: 1.1rem;
+    }
+
+    .table thead {
+        background-color: #343a40;
+        color: #fff;
+    }
+
+    .table tbody tr:nth-child(1) {
+        background-color: #ffc107 !important; /* Top rank */
+    }
+
+    .table tbody tr:hover {
+        background-color: #f0f0f0;
+        cursor: pointer;
+    }
+
+    .table {
+        border: 2px solid #333;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="layout">
+  
+
+    <!-- Main content -->
+    <div class="main-content">
+        <h3 class="text-center mt-4 mb-4 animated-heading">
+            Foreman Leaderboard
+        </h3>
+
+        <div class="mb-3">
+            <a class="btn btn-secondary" href="javascript:history.back()">⬅️ Back</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover shadow-sm bg-light">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">Rank</th>
+                        <th style="width: 35%;">Foreman</th>
+                        <th style="width: 35%;">Tasks Completed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var rowClass = i == 0 ? "table-warning fw-bold" : "";
+
+                        <tr class="@rowClass">
+                            <td>@(i + 1)</td>
+                            <td>@Model[i].FullName</td>
+                            <td>@Model[i].CompletedTasks</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

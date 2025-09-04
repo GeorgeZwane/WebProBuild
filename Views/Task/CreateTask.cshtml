@@ -24,72 +24,43 @@
                     @Html.AntiForgeryToken()
                     <div class="contact_form-container">
                         <div>
-                            @* Display validation summary for general errors *@
-                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
                             @* Hidden field to store ProjectId - user won't see this *@
                             @Html.HiddenFor(m => m.ProjectId)
 
                             @Html.TextBoxFor(m => m.TaskName, new { @class = "form-control", placeholder = "Task Name" })
-                            @Html.ValidationMessageFor(m => m.TaskName, "", new { @class = "text-danger" })
+                            @Html.ValidationMessageFor(m => m.TaskName)
 
                             @Html.TextBoxFor(m => m.Description, new { @class = "form-control", placeholder = "Description" })
-                            @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+                            @Html.ValidationMessageFor(m => m.Description)
 
                             @Html.TextBoxFor(m => m.Startdate, new { @class = "form-control", type = "datetime-local", placeholder = "Start Time" })
-                            @Html.ValidationMessageFor(m => m.Startdate, "", new { @class = "text-danger" })
+                            @Html.ValidationMessageFor(m => m.Startdate)
 
                             @Html.TextBoxFor(m => m.Enddate, new { @class = "form-control", type = "datetime-local", placeholder = "Deadline" })
-                            @Html.ValidationMessageFor(m => m.Enddate, "", new { @class = "text-danger" })
+                            @Html.ValidationMessageFor(m => m.Enddate)
 
                             @Html.TextBoxFor(m => m.Priority, new { @class = "form-control", placeholder = "Priority" })
-                            @Html.ValidationMessageFor(m => m.Priority, "", new { @class = "text-danger" })
+                            @Html.ValidationMessageFor(m => m.Priority)
 
                             <div class="form-group">
-                                @Html.LabelFor(m => m.AssignedTo, "Assign to Foreman:", new { @class = "control-label" })
-                                @Html.DropDownListFor(
+                                @Html.LabelFor(m => m.UserId, new { @class = "control-label" })
+                                @Html.TextBoxFor(m => m.UserId, new { @class = "form-control", placeholder = "AssignTo" })
+                                @* @Html.DropDownListFor(
                                 m => m.AssignedTo,
                                                         Model.Users,
-                                                        "-- Select a foreman --",
+                                                        "Select a user", // Optional: A default option
                                                         new { @class = "form-control" }
-                                                        )
-                            @Html.ValidationMessageFor(m => m.AssignedTo, "", new { @class = "text-danger" })
+                                                        ) *@
+                            @Html.ValidationMessageFor(m => m.UserId)
                         </div>
 
-                        <div class="btn-box">
-                            <button type="submit" class="btn btn-primary">CREATE</button>
+                            <div class="btn-box">
+                                <button type="submit" class="btn btn-primary">CREATE</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                                }
+                }
             </div>
         </div>
     </div>
 </section>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const dropdown = document.querySelector('select[name="AssignedTo"]');
-        const debugSpan = document.getElementById('selectedId');
-
-        if (dropdown && debugSpan) {
-            // Show current value on page load
-            debugSpan.textContent = dropdown.value || 'None';
-
-            // Update debug display when selection changes
-            dropdown.addEventListener('change', function() {
-                debugSpan.textContent = this.value || 'None';
-                console.log('Dropdown changed - Value:', this.value, 'Text:', this.options[this.selectedIndex].text);
-            });
-        }
-
-        // Debug: Show all available options
-        console.log('Available foremen options:');
-        if (dropdown) {
-            for (let i = 0; i < dropdown.options.length; i++) {
-                const option = dropdown.options[i];
-                console.log(`Option ${i}: Value="${option.value}", Text="${option.text}"`);
-            }
-        }
-    });
-</script>

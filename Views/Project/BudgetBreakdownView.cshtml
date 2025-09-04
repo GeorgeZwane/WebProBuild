@@ -1,0 +1,142 @@
+﻿@model List<WebSpaceApp.Models.DashboardViewModel>
+
+@{
+    ViewData["Title"] = "Project Budget Breakdown";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 30px;
+    }
+
+    th, td {
+        padding: 12px 16px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    th {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    h2 {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .status-green {
+        color: green;
+        font-weight: bold;
+    }
+
+    .status-orange {
+        color: orange;
+        font-weight: bold;
+    }
+
+    .status-red {
+        color: red;
+        font-weight: bold;
+    }
+
+    .summary-box {
+        background: #fff3cd;
+        border: 1px solid #ffeeba;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 6px;
+        color: #856404;
+    }
+</style>
+
+<h2>All Projects - Budget and Task Breakdown</h2>
+
+@if (!Model.Any())
+{
+    <div class="summary-box">No projects found.</div>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Budget (R)</th>
+                <th>Total Tasks</th>
+                <th>Completed</th>
+                <th>In Progress</th>
+                <th>In Waiting</th>
+                <th>Status</th>
+                <th>Completion Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in Model)
+            {
+                var completionRate = project.TotalTasks > 0
+                ? (int)((double)project.CompletedTasks / project.TotalTasks * 100)
+                : 0;
+
+                string statusClass = completionRate >= 75 ? "status-green"
+                : completionRate >= 40 ? "status-orange"
+                : "status-red";
+
+                <tr>
+                    <td>@project.ProjectName</td>
+                    <td>@project.TotalBudget.ToString("N2")</td>
+                    <td>@project.TotalTasks</td>
+                    <td>@project.CompletedTasks</td>
+                    <td>@project.InProgressTasks</td>
+                    <td>@project.InWaitingTasks</td>
+                    <td class="@statusClass">
+                        @(completionRate >= 75 ? "On Track" :
+                                        completionRate >= 40 ? "At Risk" :
+                                        "Delayed")
+            </td>
+            <td>@completionRate %</td>
+        </tr>
+                }
+        </tbody>
+    </table>
+
+    <!-- Sortable Table Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const table = document.querySelector("table");
+            const headers = table.querySelectorAll("th");
+            let sortOrder = 1; // 1 = ascending, -1 = descending
+
+            headers.forEach((header, index) => {
+                header.style.cursor = "pointer";
+                header.addEventListener("click", function () {
+                    const rows = Array.from(table.querySelectorAll("tbody tr"));
+                    const isNumeric = !isNaN(rows[0].children[index].innerText.replace(/[^0-9.]/g, ''));
+
+                    rows.sort((a, b) => {
+                        const cellA = a.children[index].innerText.trim();
+                        const cellB = b.children[index].innerText.trim();
+
+                        const valueA = isNumeric ? parseFloat(cellA.replace(/[^0-9.]/g, '')) : cellA.toLowerCase();
+                        const valueB = isNumeric ? parseFloat(cellB.replace(/[^0-9.]/g, '')) : cellB.toLowerCase();
+
+                        return (valueA > valueB ? 1 : valueA < valueB ? -1 : 0) * sortOrder;
+                    });
+
+                    sortOrder *= -1; // Toggle sort direction
+
+                    const tbody = table.querySelector("tbody");
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            });
+        });
+    </script>
+
+}

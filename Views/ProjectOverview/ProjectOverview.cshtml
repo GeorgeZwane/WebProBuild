@@ -210,27 +210,21 @@
     <div class="sidebar">
         <div class="logo">Main Menu</div>
         <ul class="nav-list">
-            <li class="active">
+            <li>
                 <a href="@Url.Action("ProjectOverview", "ProjectOverview")">Overview</a>
             </li>
-@*             <li>
-                <a href="@Url.Action("CreateProject", "Project")">Create Project</a>
-            </li> *@
+
             <li>
                 <a href="@Url.Action("CompleteProjects", "Project")">Projects</a>
             </li>
             <li>
                 <a href="@Url.Action("TaskReport", "Task")">Task Reports</a>
+                </li>
+
+            <li>
+                <a href="@Url.Action("SendNotificationView", "Task")">Notifications</a>
             </li>
-          @*   <li>
-                <a href="@Url.Action("ProjectsViewAll", "Project")">All Projects</a>
-            </li> *@
-            @* <li>
-                <a href="@Url.Action("ViewTask", "Task")">Ta</a>
-            </li> *@
-           @*  <li>
-                <a href="@Url.Action("AddTeamView", "Project")">Add Team</a>
-            </li> *@
+
             <li>
                 <a href="@Url.Action("Logout", "Account")">Log out</a>
             </li> 
@@ -252,7 +246,7 @@
 
        
         <div class="recent-activity">
-            <center><h2>Task Project</h2></center>
+            <center><h2>Projects Overview</h2></center>
             <div class="activity-cards">
                 <div class="card">
                     <span>@Model.ProjectCount</span>
@@ -274,7 +268,7 @@
                     <span>Total Amount Spent</span>
                     <p>R @Model.TotalBudget</p>
                     <form asp-controller="Budget" asp-action="BudgetList" method="get">
-                        <button type="submit" class="view-more">See breakdown</button>
+                        <button type="submit" class="view-more"><a href="@Url.Action("BudgetBreakdownView", "Project")" class="view-more">See breakdown</a></button>
                     </form>
                 </div>
             </div>
@@ -361,6 +355,10 @@
                         {
                             <span style="color: red;">Project completion is below 50%.</span>
                         }
+                        else if (completionRatePro > 50 && completionRatePro < 80)
+                        {
+                            <span style="color: orange;">Project completion is above 50%.</span>
+                        }
                         else if (completionRatePro >= 80)
                         {
                             <span style="color: green;">Great progress!</span>
@@ -403,6 +401,10 @@
                         @if (completionRate < 50)
                         {
                             <span style="color: red;">Task completion is below 50%.</span>
+                        }
+                        else if (completionRatePro >= 50 && completionRatePro < 80)
+                        {
+                            <span style="color: orange;">Project completion is above 50%.</span>
                         }
                         else if (completionRate >= 80)
                         {
@@ -453,7 +455,7 @@
             const projectChart = new Chart(projectCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Completed', 'In Progress', 'Not Started'],
+                    labels: ['Complete', 'In Progress', 'InWaiting'],
                     datasets: [{
                         label: 'Project Stats',
                         data: [
@@ -478,7 +480,7 @@
             const taskChart = new Chart(taskCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Completed', 'In Progress', 'Not Started'],
+                    labels: ['Complete', 'In Progress', 'InWaiting'],
                     datasets: [{
                         label: 'Task Stats',
                         data: [

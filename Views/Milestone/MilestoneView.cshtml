@@ -35,7 +35,7 @@
     .card {
         background-color: #ffffff;
         border: 1px solid #ddd;
-        border-left: 5px solid #0078D7;
+        border-left: 5px solid darkorange;
         border-radius: 6px;
         padding: 15px 20px;
         box-shadow: 0 1px 4px rgba(0,0,0,0.05);
@@ -48,7 +48,7 @@
 
         .card h3 {
             margin-top: 0;
-            color: #0078D7;
+            color: darkorange;
         }
 
         .card p {
@@ -65,16 +65,6 @@
             background-color: #fff5f5;
         }
 
-        .card.completed {
-            border-left-color: #28a745;
-            background-color: #f4fff4;
-        }
-
-        .card.in-progress {
-            border-left-color: #f0ad4e;
-            background-color: #fffdf4;
-        }
-
         .card .reason {
             color: #d9534f;
             font-style: italic;
@@ -89,7 +79,7 @@
         display: inline-block;
         margin-top: 10px;
         padding: 8px 12px;
-        background-color: #0078D7;
+        background-color: darkorange;
         color: white;
         text-decoration: none;
         border-radius: 4px;
@@ -98,34 +88,34 @@
     }
 
         .update-btn:hover {
-            background-color: #005fa3;
-        }
+            background-color: darkorange;
 </style>
 
 <div class="container">
     <h2>@ViewData["Title"]</h2>
     <div class="card-grid">
+     @if (Model != null && Model.Any())
+                {
         @foreach (var milestone in Model)
         {
-            var statusClass = milestone.Status switch
-            {
-                "Completed" => "completed",
-                "In Progress" => "in-progress",
-                "Delayed" => "delayed",
-                _ => "" // "Not Started" or any other status
-            };
+            var isDelayed = milestone.Status == "Delayed";
+            /* var reasonClass = milestone.Reason.Contains("on time", StringComparison.OrdinalIgnoreCase) || milestone.Reason.Contains("on track", StringComparison.OrdinalIgnoreCase)
+            ? "reason on-time" : "reason"; */
 
-            <div class="card @(statusClass)">
+            <div class="card @(isDelayed ? "delayed" : "")">
                 <h3>@milestone.MilestoneName</h3>
                 <p><strong>Description:</strong> @milestone.Description</p>
                 <p><strong>Due Date:</strong> @milestone.DueDate.ToString("yyyy-MM-dd")</p>
                 <p><strong>Status:</strong> @milestone.Status</p>
-                <p><strong>Reason:</strong> @milestone.Reason</p>
-
-                @if (ViewBag.UserRole == "Foremen")
-                {
-                    <a href="@Url.Action("UpdateMilestone", "Milestone", new { Id = milestone.Id })" class="update-btn">Update</a>
-                }
+                <p ><strong>Reason:</strong> @milestone.Reason</p>
+                <a href="@Url.Action("UpdateMilestone", "Milestone", new { Id = milestone.Id })" class="update-btn">Update</a>
+            </div>
+        }
+        }
+        else
+        {
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; font-size: 18px; color: #888;">
+                🚧 No active milestones available at the moment.
             </div>
         }
     </div>

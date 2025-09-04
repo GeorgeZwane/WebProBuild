@@ -229,7 +229,7 @@
             background-color: #000;
         }
 
-    
+
     .progress-container {
         margin-bottom: 15px;
     }
@@ -274,24 +274,24 @@
             animation: progress-bar-stripes 1s linear infinite;
         }
 
- 
 
-    /* Different colors based on progress */
-    .progress-bar.low-progress {
-        background: linear-gradient(90deg, #dc3545 0%, #e74c3c 100%);
-    }
 
-    .progress-bar.medium-progress {
-        background: linear-gradient(90deg, #ffc107 0%, #f39c12 100%);
-    }
+        /* Different colors based on progress */
+        .progress-bar.low-progress {
+            background: linear-gradient(90deg, #dc3545 0%, #e74c3c 100%);
+        }
 
-    .progress-bar.high-progress {
-        background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
-    }
+        .progress-bar.medium-progress {
+            background: linear-gradient(90deg, #ffc107 0%, #f39c12 100%);
+        }
 
-    .progress-bar.complete {
-        background: linear-gradient(90deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
-    }
+        .progress-bar.high-progress {
+            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+        }
+
+        .progress-bar.complete {
+            background: linear-gradient(90deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
+        }
 
     .progress-percentage {
         font-weight: 600;
@@ -316,15 +316,17 @@
             <li class="active">
                 <a href="@Url.Action("ViewTask", "Task")">View Task</a>
             </li>
+
             <li>
-                <a href="@Url.Action("CreateTask", "Task")">Add More Tasks</a>
+                <a href="@Url.Action("ViewForeManProgress", "Task")">View Progress</a>
             </li>
+
             <li>
                 <a href="@Url.Action("LeaderboardView", "Task")">LeaderboardView</a>
             </li>
 
             <li>
-                <a href="@Url.Action("SendNotificationView", "Task")">Notification</a>
+                <a href="@Url.Action("NotificationView", "Task")">Notification</a>
             </li>
 
             <li>
@@ -350,12 +352,12 @@
                         <div class="project-meta">
                             Created: @task.StartDate.ToString("MMMM dd, yyyy") |
                             Deadline: @task.EndDate.ToString("MMMM dd, yyyy")
-                            
+
                         </div>
                         <div class="progress-container">
                             <div class="progress-label">
                                 <span>Progress</span>
-                                <span class="progress-percentage">@(task.Progress ?? 0)%</span>
+                                <span class="progress-percentage">@((task.Progress ?? 0).ToString("F2"))%</span>
                                 Priority: @task.Priority
                             </div>
                             <div class="progress-bar-container">
@@ -364,13 +366,13 @@
                                      (task.Progress ?? 0) >= 75 ? "high-progress" :
                                      (task.Progress ?? 0) >= 50 ? "medium-progress" :
                                      "low-progress"
-                                                                )" style="width: @(task.Progress ?? 0) % "></div>
+                                                                                                                                )" style="width: @(task.Progress ?? 0) % "></div>
                     </div>
                 </div>
                 <div class="action-buttons">
-
-                            <a href="@Url.Action("AddMilestone", "Milestone", new { taskId = task.Id})" class="btn btn-primary">Add Milestone</a>
-                          
+                    @* <a href="@Url.Action("ViewTask", "Task", new { id = task.Id })" class="btn btn-primary">View Tasks</a>
+                            <a href="@Url.Action("DocumentView", "Document")" class="btn btn-secondary">Updates</a> *@
+                            
                             <a href="@Url.Action("MilestoneView", "Milestone", new { id = task.Id })" class="btn btn-primary">View Milestones</a>
                         </div>
                     </div>

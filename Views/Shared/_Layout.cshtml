@@ -16,13 +16,11 @@
 
     <title>PROBUILD Construction</title>
 
-
-
-    <!-- Sweet arlt -->
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- bootstrap core css -->
+
     <link href="~/css/bootstrap.css" rel="stylesheet" />
+    <!-- fonts style -->
+  
 
     <!-- Custom styles for this template -->
     <link href="~/css/style.css" rel="stylesheet" />
@@ -43,7 +41,7 @@
             <div class="header_bottom">
                 <div class="container-fluid">
                     <nav class="navbar navbar-expand-lg custom_nav-container">
-                        <a class="navbar-brand" href="@Url.Action("Dashboard", "Project")">
+                        <a class="navbar-brand" href="@Url.Action("Index", "Home")">
                             <span>ProBuildManager</span>
                         </a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,6 +68,7 @@
                                 bool isInventory = currentController == "Inventory" && currentAction == "Index";
                                 bool isAdmin = currentController == "Admin" && currentAction == "Index";
                                 bool isAddTeam = currentController == "Team" && currentAction == "AddTeam";
+                             //   bool isViewMile = currentController == "Team" && currentAction == "AddTeam";
                                 
                             }
 
@@ -87,9 +86,11 @@
                                         <a class="nav-link" href="@Url.Action("Login", "Account")">Login</a>
                                     </li>
                                 }
+
                                 else if (isHomePage)
                                 {
                                     <!-- On Home page, show both Login and Register -->
+
                                     <li class="nav-item">
                                         <a class="nav-link" href="@Url.Action("Login", "Account")">Login</a>
                                     </li>
@@ -100,70 +101,26 @@
                                 else
                                 {
 
-                                    @if (!string.IsNullOrEmpty(userRole))
+
+                                    @if (userRole != "Admin" && userRole != "Director" && userRole != "Foreman")
                                     {
-                                        switch (userRole)
+                                        @if (!isProjectView)
                                         {
-                                            case "Foremen":
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("ProjectView", "Project")">Assigned Projects</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("MilestoneView", "Milestone")">Milestones</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("DocumentView", "Document")">document</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("DocumentUpload", "Document")">Udocument</a>
-                                                </li>
-                                                break;
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="@Url.Action("ProjectView", "Project")">View Project</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="@Url.Action("CreateProject", "Project")">Create Project</a>
+                                            </li>
+                                        }
 
-                                            case "Project Manager":
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("CreateProject", "Project")">Create Project</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("ProjectView", "Project")">Manage Projects</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("CreateTask", "Task")">Assign Tasks</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("DocumentView", "Document")">document</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("DocumentUpload", "Document")">Udocument</a>
-                                                </li>
-                                                break;
-
-                                            case "Director":
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("Dashboard", "Project")">Executive Dashboard</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("Reports", "Analytics")">Reports</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("TeamOverview", "Team")">Team Overview</a>
-                                                </li>
-                                                break;
-
-                                            case "Admin":
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("Index", "Admin")">Admin Panel</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("UserManagement", "Admin")">User Management</a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="@Url.Action("SystemLogs", "Admin")">System Logs</a>
-                                                </li>
-                                                break;
+                                        @if (isProjectView || isProjectOverview)
+                                        {
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="@Url.Action("CreateProject", "Project")">Create Project</a>
+                                            </li>
                                         }
                                     }
-
-
                                 }
 
                                 @if (!string.IsNullOrEmpty(userName))
@@ -176,6 +133,9 @@
                                             Hello, @userName
                                         </a>
                                     </li>
+
+                                 
+
                                     <li class="nav-item">
                                         <a class="nav-link" href="@Url.Action("Logout", "Account")">Logout</a>
                                     </li>
